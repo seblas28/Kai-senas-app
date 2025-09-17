@@ -21,9 +21,6 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
   // Estado para controlar la carga inicial de los modelos
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Cargando IA y modelos...");
-  
-  // Nuevo estado para mostrar el estado de la detección en la UI
-  const [detectionStatus, setDetectionStatus] = useState<string>("Iniciando...");
 
   const [iaModel, setIaModel] = useState<tf.LayersModel | null>(null);
   const [labels, setLabels] = useState<string[]>([]);
@@ -136,12 +133,10 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      console.log(`Frame: videoWidth=${video.videoWidth}, handLandmarker ready=${!!handLandmarker}`);
       const results = handLandmarker.detectForVideo(video, performance.now());
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (results.landmarks && results.landmarks.length > 0) {
-        setDetectionStatus("¡Mano Detectada!");
         const handLandmarks = results.landmarks[0];
         const prediction = predictVowel(handLandmarks);
         if (prediction) {
@@ -154,12 +149,9 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
           drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: "#00FF00", lineWidth: 5 });
           drawingUtils.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
         }
-      } else {
-        setDetectionStatus("Buscando mano...");
       }
     } catch (error) {
       console.error("¡ERROR ATRAPADO EN EL BUCLE DE ANIMACIÓN!", error);
-      setDetectionStatus("Error en la detección.");
       stopScan();
     }
     
@@ -192,8 +184,6 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
         
         {isLoading && <div className={styles.placeholder}>{loadingMessage}</div>}
         {!isLoading && !isCameraOn && <div className={styles.placeholder}>Enciende la cámara para empezar</div>}
-        
-        {isScanning && <div className={styles.statusOverlay}>{detectionStatus}</div>}
       </div>
 
       <div className={styles.similarityContainer}>
@@ -220,9 +210,14 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
           <button onClick={startCamera} className={styles.controlButton} disabled={isLoading}>
             {isLoading ? 'Cargando...' : 'Encender Cámara'}
           </button> :
-          !isScanning ?
-            <button onClick={startScan} className={`${styles.controlButton} ${styles.scanButton}`}>Iniciar Escaneo</button> :
+          isScanning ? (
             <button onClick={stopScan} className={`${styles.controlButton} ${styles.stopButton}`}>Detener Escaneo</button>
+          ) : (
+            <>
+              <button onClick={startScan} className={`${styles.controlButton} ${styles.scanButton}`}>Iniciar Escaneo</button>
+              <button onClick={stopCamera} className={`${styles.controlButton} ${styles.offButton}`}>Apagar Cámara</button>
+            </>
+          )
         }
       </div>
     </div>

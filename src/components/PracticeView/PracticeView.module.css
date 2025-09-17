@@ -78,6 +78,7 @@
 .controls {
   display: flex;
   justify-content: center;
+  align-items: center; /* Asegura que los botones estén alineados */
   width: 100%;
 }
 
@@ -119,17 +120,11 @@
   background-color: #cc0000;
 }
 
-.statusOverlay {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  z-index: 10;
-  transform: rotateY(180deg); /* Compensa el efecto espejo del contenedor */
+.offButton {
+  background-color: #6c757d; /* Gris */
+  margin-left: 1rem; /* Espacio entre los botones */
+}
+.offButton:hover:not(:disabled) {
+  background-color: #5a6268;
 }
 

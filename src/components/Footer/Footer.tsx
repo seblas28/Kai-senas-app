@@ -1,6 +1,6 @@
 // src/components/Footer/Footer.tsx
 import React from 'react';
-import { Link } from 'react-router-dom'; // <-- 1. Importa el componente Link
+//import { Link } from 'react-router-dom'; // <-- 1. Importa el componente Link
 import styles from './Footer.module.css';
 
 const Footer: React.FC = () => {
