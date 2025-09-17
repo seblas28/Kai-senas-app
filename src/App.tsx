@@ -7,8 +7,8 @@ import Footer from './components/Footer/Footer';
 import LandingPage from './pages/LandingPage/LandingPage';
 import PracticePage from './pages/PracticePage/PracticePage';
 import ProgressPage from './pages/ProgressPage/ProgressPage';
-//import LoginPage from './pages/LoginPage/LoginPage';
-//import TrainingPage from './pages/TrainingPage/TrainingPage';
+import LoginPage from './pages/LoginPage/LoginPage';
+import TrainingPage from './pages/TrainingPage/TrainingPage';
 
 const App: React.FC = () => {
   return (
@@ -28,10 +28,10 @@ const App: React.FC = () => {
           <Route path="/progreso" element={<ProgressPage />} />
 
           {/* Ruta para la página de login */}
-          {/*<Route path="/training-login" element={<LoginPage />} />*/}
+          <Route path="/training-login" element={<LoginPage />} />
 
           {/* Ruta para la página de entrenamiento */}
-          {/*<Route path="/training" element={<TrainingPage />} />*/}
+          <Route path="/training" element={<TrainingPage />} />
         </Routes>
       </main>
       <Footer />
