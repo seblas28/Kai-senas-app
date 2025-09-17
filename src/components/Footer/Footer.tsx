@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
       <p>&copy; {new Date().getFullYear()} KaiSeñas. Todos los derechos reservados.</p>
       
       {/* 2. Añade el contenedor y el enlace para el login de entrenamiento */}
-      <div className={styles.adminLinkContainer}>}
+      <div className={styles.adminLinkContainer}>
         <Link to="/training-login" className={styles.adminLink}>
           Acceso de Entrenamiento ⚙️
         </Link>
