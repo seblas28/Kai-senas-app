@@ -151,9 +151,6 @@ const TrainingPage: React.FC = () => {
       return;
     }
     
-    // --- CONFIGURACIÓN DE SERVIDORES ---
-    // Para desarrollo local, usa la URL de localhost.
-    // Para la presentación, comenta la línea de localhost y descomenta la de Colab.
     //const LOCAL_SERVER_URL = "http://localhost:5001/receive_data";
     const CLOUD_SERVER_URL = "https://kai-senas-trainer.onrender.com/receive_data";
 
