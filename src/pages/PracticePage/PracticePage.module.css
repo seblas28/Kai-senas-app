@@ -1,0 +1,84 @@
+/* src/pages/PracticePage/PracticePage.module.css */
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centrado verticalmente */
+  min-height: calc(100vh - 150px); /* Ajusta según altura de tu nav/footer */
+  padding: 2rem;
+}
+
+.practiceCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center; /* Alinea los items en el centro */
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1000px; /* Contenedor principal más pequeño */
+  background-color: var(--card-bg);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.videoContainer {
+  flex: 1.5; /* Reduce la proporción del video */
+  min-width: 400px;
+}
+
+.infoPanel {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.highlight {
+  color: var(--secondary-color);
+  font-weight: 700;
+}
+
+.instructions {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.referenceContainer {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.referenceImage {
+  width: 100%;
+  display: block;
+}
+
+.backButton {
+  display: inline-block;
+  text-align: center;
+  margin-top: auto; /* Empuja el botón hacia abajo */
+  padding: 0.8rem 1.5rem;
+  background-color: #e9e8f8;
+  color: var(--primary-color);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: #d8d6f3;
+}
+

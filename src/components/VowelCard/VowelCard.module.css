@@ -1,0 +1,40 @@
+/* src/components/VowelCard/VowelCard.module.css */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%; /* Asegura que todas las tarjetas en una fila tengan la misma altura */
+  border: 2px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(74, 71, 163, 0.15);
+  border-color: var(--secondary-color);
+}
+
+.vowelImage {
+  height: 100px; /* Hacemos la imagen un poco más grande para que ocupe el espacio de la letra */
+  margin-bottom: 1rem;
+  object-fit: contain; /* Asegura que la imagen no se deforme */
+}
+
+/* El estilo .vowelLetter que mostraba la letra A, E, I, etc., ha sido eliminado */
+
+.vowelDescription {
+  font-size: 0.95rem; /* Hacemos el texto un poco más grande y legible */
+  color: #555;
+  text-decoration: none;
+  line-height: 1.5;
+  margin-top: auto; /* Empuja la descripción hacia abajo para que la imagen quede bien centrada */
+  padding-top: 0.5rem; /* Pequeño espacio entre la imagen y la descripción */
+  flex-grow: 1; 
+}
+
