@@ -155,7 +155,7 @@ const TrainingPage: React.FC = () => {
     // Para desarrollo local, usa la URL de localhost.
     // Para la presentación, comenta la línea de localhost y descomenta la de Colab.
     //const LOCAL_SERVER_URL = "http://localhost:5001/receive_data";
-    const CLOUD_SERVER_URL = "https://kai-senas-trainer.onrender.com";
+    const CLOUD_SERVER_URL = "https://kai-senas-trainer.onrender.com/receive_data";
 
     // Elige qué servidor usar
     const final_url = CLOUD_SERVER_URL; // O cambia a CLOUD_SERVER_URL cuando uses Colab
