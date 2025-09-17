@@ -4,10 +4,8 @@ import { Link } from 'react-router-dom';
 import styles from './ProgressPage.module.css';
 import StatCard from '../../components/StatCard/StatCard';
 import VowelCard from '../../components/VowelCard/VowelCard';
-import {vowelData} from '../../data/vowelData';
-import type { VowelInfo } from '../../data/vowelData';
+import { vowelData, VowelInfo } from '../../data/vowelData';
 
-// Definimos la estructura de datos que esperamos de localStorage
 interface VowelProgress {
   bestScore: number;
   sessions: number;
@@ -30,8 +28,7 @@ const ProgressPage: React.FC = () => {
   });
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [vowelsToPractice, setVowelsToPractice] = useState<VowelInfo[]>([]);
-  const[showConfirm, setShowConfirm] = useState(false);
-
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     const progressData: { [key: string]: VowelProgress } = JSON.parse(localStorage.getItem('progressData') || '{}');
@@ -68,16 +65,28 @@ const ProgressPage: React.FC = () => {
       totalTime: `${minutes}m ${seconds}s`,
     });
 
-    setRecentSessions(recentData.slice(0, 5)); // Mostrar las 5 más recientes
+    setRecentSessions(recentData.slice(0, 5));
   }, []);
 
   const handleClearProgress = () => {
-    // Borra los datos del almacenamiento local
+    // 1. Borra los datos del almacenamiento local
     localStorage.removeItem('progressData');
     localStorage.removeItem('recentSessions');
     
-    // Recarga la página para que los cambios se reflejen inmediatamente
-    window.location.reload();
+    // 2. Cierra el modal de confirmación
+    setShowConfirm(false);
+    
+    // 3. Reinicia los estados del componente para forzar una re-renderización
+    //    y mostrar la página en su estado inicial (vacío).
+    setSummary({
+      completed: 0,
+      avgPercentage: 0,
+      totalSessions: 0,
+      totalTime: "0m 0s",
+    });
+    setRecentSessions([]);
+    // Como no hay progreso, todas las vocales están disponibles para practicar.
+    setVowelsToPractice(vowelData); 
   };
 
   const formatTimestamp = (ts: number) => {
@@ -158,3 +167,4 @@ const ProgressPage: React.FC = () => {
 };
 
 export default ProgressPage;
+
