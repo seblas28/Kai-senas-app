@@ -1,7 +1,11 @@
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getSignsByCategory } from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
+import { useSpeech } from '../../context/SpeechContext';
+import { speak } from '../../utils/speech';
 
 type Landmark = { x: number; y: number; z: number };
 type TrainingSample = { landmarks: Landmark[]; label: string };
@@ -10,14 +14,20 @@ const SAMPLES_PER_BURST = 30;
 const CAPTURE_INTERVAL_MS = 100;
 
 const TrainingPage: React.FC = () => {
+  // Obtiene la categoría de la URL (ej: "vocales", "numeros")
+  const { category } = useParams<{ category: string }>();
+  const { isSpeechEnabled } = useSpeech();
+
+  const [categoryLabels, setCategoryLabels] = useState<string[]>([]);
+  const [selectedLabel, setSelectedLabel] = useState<string>('');
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameId = useRef<number | null>(null);
   const isCameraOnRef = useRef(false);
-
+  const animationFrameId = useRef<number | null>(null);
+  
   const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const [selectedVowel, setSelectedVowel] = useState<string>('A');
   const [trainingData, setTrainingData] = useState<TrainingSample[]>([]);
   const [lastCapturedHand, setLastCapturedHand] = useState<Landmark[] | null>(null);
   
@@ -25,9 +35,20 @@ const TrainingPage: React.FC = () => {
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
 
-  const vowelsAndNull = ['A', 'E', 'I', 'O', 'U', 'Nulo'];
-
   useEffect(() => {
+    // Carga las etiquetas correspondientes a la categoría de la URL
+    if (category) {
+      const signs = getSignsByCategory(category);
+      const labels = signs.map(sign => sign.label);
+      const allLabels = [...labels, 'Nulo']; // Siempre añadimos 'Nulo' para robustez
+      setCategoryLabels(allLabels);
+      if (allLabels.length > 0) {
+        setSelectedLabel(allLabels[0]);
+      }
+
+      speak(`Entrenando la categoría ${category}.`, isSpeechEnabled);
+    }
+
     const token = sessionStorage.getItem('auth-token');
     if (!token) { window.location.href = '/training-login'; }
     const createHandLandmarker = async () => {
@@ -40,7 +61,7 @@ const TrainingPage: React.FC = () => {
     };
     createHandLandmarker();
     return () => stopCamera();
-  }, []);
+  }, [category, isSpeechEnabled]);
 
   const startCamera = async () => {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
@@ -50,11 +71,16 @@ const TrainingPage: React.FC = () => {
         setIsCameraOn(true);
         isCameraOnRef.current = true;
         predictWebcam();
+
+        speak("Cámara encendida. Selecciona una etiqueta y captura muestras.", isSpeechEnabled);
       });
     }
   };
 
   const stopCamera = () => {
+    if (!isCameraOnRef.current) {
+      speak("La cámara ya está apagada.", isSpeechEnabled);
+    }
     isCameraOnRef.current = false;
     setIsCameraOn(false);
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -93,29 +119,36 @@ const TrainingPage: React.FC = () => {
     }
   };
 
-  const handleCapture = () => {
-    if (lastCapturedHand) {
-      const normalizedLandmarks = normalizeLandmarks(lastCapturedHand);
-      const newSample: TrainingSample = { landmarks: normalizedLandmarks, label: selectedVowel };
-      setTrainingData(prevData => [...prevData, newSample]);
-    }
-  };
-
   const normalizeLandmarks = (landmarks: Landmark[]): Landmark[] => {
     const baseX = landmarks[0].x;
     const baseY = landmarks[0].y;
-    return landmarks.map(lm => ({
-      x: lm.x - baseX,
-      y: lm.y - baseY,
-      z: lm.z,
-    }));
+    return landmarks.map(lm => ({ x: lm.x - baseX, y: lm.y - baseY, z: lm.z }));
   };
 
-  const getSampleCount = (vowel: string) => {
-    return trainingData.filter(d => d.label === vowel).length;
+  const getSampleCount = (label: string) => {
+    return trainingData.filter(d => d.label === label).length;
   };
-
+  
+  const handleCapture = () => {
+    if (lastCapturedHand) {
+      const normalizedLandmarks = normalizeLandmarks(lastCapturedHand);
+      const newSample: TrainingSample = { landmarks: normalizedLandmarks, label: selectedLabel };
+      setTrainingData(prevData => [...prevData, newSample]);
+    }
+  };
+  
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+  const handleLabelSelect = (label: string) => {
+    setSelectedLabel(label);
+    speak(`Seleccionado: ${label}`, isSpeechEnabled);
+  }
+
+  const handleClearData = () => {
+    setTrainingData([]);
+    setFeedbackMessage('');
+    speak("Datos de entrenamiento limpiados.", isSpeechEnabled);
+  }
 
   const handleBurstCapture = async () => {
     if (!lastCapturedHand) {
@@ -124,6 +157,9 @@ const TrainingPage: React.FC = () => {
       return;
     }
     setIsBursting(true);
+
+    speak("Iniciando captura en ráfaga.", isSpeechEnabled);
+
     for (let i = 3; i > 0; i--) {
       setFeedbackMessage(`Prepárate en ${i}...`);
       await delay(1000);
@@ -140,30 +176,32 @@ const TrainingPage: React.FC = () => {
         }
       }, CAPTURE_INTERVAL_MS);
     });
-    setFeedbackMessage(`¡Listo! ${SAMPLES_PER_BURST} muestras de [${selectedVowel}] capturadas.`);
+    const completionMessage = `Captura de ${selectedLabel} completada.`;
+    setFeedbackMessage(completionMessage);
+    speak(completionMessage, isSpeechEnabled);
     setIsBursting(false);
     setTimeout(() => setFeedbackMessage(''), 4000);
   };
-
+  
   const handleSendDataAndTrain = async () => {
-    if (trainingData.length === 0) {
-      alert("No hay datos para enviar.");
-      return;
-    }
+    if (trainingData.length === 0) return alert("No hay datos para enviar.");
     
-    //const LOCAL_SERVER_URL = "http://localhost:5001/receive_data";
-    const CLOUD_SERVER_URL = "https://kai-senas-trainer.onrender.com/receive_data";
-
     // Elige qué servidor usar
-    const final_url = CLOUD_SERVER_URL; // O cambia a CLOUD_SERVER_URL cuando uses Colab
+    const final_url = "http://localhost:5001/receive_data"; // O tu URL de Render
 
     setIsSending(true);
     setFeedbackMessage('Enviando datos al servidor...');
+    speak("Enviando datos para entrenar el modelo.", isSpeechEnabled);
+
     try {
+      const payload = {
+        category: category,
+        data: trainingData
+      };
       const response = await fetch(final_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(trainingData),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
       setFeedbackMessage('¡Datos enviados! Revisa la terminal del servidor para ver el progreso.');
@@ -184,28 +222,38 @@ const TrainingPage: React.FC = () => {
           {feedbackMessage && <div className={styles.feedbackOverlay}>{feedbackMessage}</div>}
           {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
         </div>
+
         <div className={styles.controls}>
-          <h1 className={styles.title}>Panel de Entrenamiento</h1>
-          <p>Selecciona una clase y captura muestras.</p>
-          <div className={styles.vowelSelector}>
-            {vowelsAndNull.map(label => (
-              <button key={label} onClick={() => setSelectedVowel(label)}
-                className={`${styles.vowelButton} ${selectedVowel === label ? styles.selected : ''} ${label === 'Nulo' ? styles.nuloButton : ''}`}
-                disabled={isBursting || isSending}>
+          <h1 className={styles.title}>
+            Entrenando Categoría: <span className={styles.highlight}>{category}</span>
+          </h1>
+          <p>Selecciona una seña de esta categoría y captura muestras.</p>
+          
+          <div className={styles.labelSelector}>
+            {categoryLabels.map(label => (
+              <button 
+                key={label} 
+                onClick={() => handleLabelSelect(label)}
+                className={`${styles.labelButton} ${selectedLabel === label ? styles.selected : ''} ${label === 'Nulo' ? styles.nuloButton : ''}`}
+                disabled={isBursting || isSending}
+              >
                 {label} ({getSampleCount(label)})
               </button>
             ))}
           </div>
+
           <div className={styles.actions}>
-             {!isCameraOn ? 
-                <button onClick={startCamera} className={styles.actionButton} disabled={isBursting || isSending}>Encender Cámara</button> :
-                <button onClick={stopCamera} className={`${styles.actionButton} ${styles.stopButton}`} disabled={isBursting || isSending}>Apagar Cámara</button>
-             }
+            <Link to="/" className={styles.backButton}>← Volver al Inicio</Link>
+            <hr className={styles.divider}/>
+            {!isCameraOn ? 
+              <button onClick={startCamera} className={styles.actionButton} disabled={isBursting || isSending}>Encender Cámara</button> :
+              <button onClick={stopCamera} className={`${styles.actionButton} ${styles.stopButton}`} disabled={isBursting || isSending}>Apagar Cámara</button>
+            }
             <button onClick={handleBurstCapture} disabled={!isCameraOn || isBursting || isSending} className={`${styles.actionButton} ${styles.burstButton}`}>
               Capturar Ráfaga ({SAMPLES_PER_BURST})
             </button>
-            <button onClick={() => setTrainingData([])} disabled={trainingData.length === 0 || isBursting || isSending} className={`${styles.actionButton} ${styles.clearButton}`}>
-                Limpiar Datos ({trainingData.length})
+            <button onClick={handleClearData} disabled={trainingData.length === 0 || isBursting || isSending} className={`${styles.actionButton} ${styles.clearButton}`}>
+              Limpiar Datos ({trainingData.length})
             </button>
             <hr className={styles.divider}/>
             <button onClick={handleSendDataAndTrain} disabled={trainingData.length === 0 || isBursting || isSending} className={`${styles.actionButton} ${styles.sendButton}`}>

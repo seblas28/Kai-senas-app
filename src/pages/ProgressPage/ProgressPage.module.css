@@ -71,13 +71,13 @@
   font-size: 0.85rem;
 }
 
-.vowelsGrid {
+.cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
 }
 
-.vowelLink{
+.cardLink{
   text-decoration: none;
   color: inherit;
   display: flex;
@@ -189,3 +189,4 @@
 .confirmButton:hover {
   background-color: #cc0000;
 }
+

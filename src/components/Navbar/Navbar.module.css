@@ -1,4 +1,4 @@
-/* src/components/Navbar/Navbar.css */
+/* src/components/Navbar/Navbar.module.css */
 .navbar {
   background-color: var(--card-bg);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -24,12 +24,19 @@
   text-decoration: none;
 }
 
+/* --- NUEVOS ESTILOS PARA LA AGRUPACIÓN --- */
+.navItems {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espacio entre la lista de enlaces y el botón de voz */
+}
+
 .navLinks {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.5rem; /* Espacio entre "Inicio" y "Mi Progreso" */
 }
 
 .navLinks a {
@@ -37,8 +44,22 @@
   color: var(--text-color);
   font-weight: 500;
   transition: color 0.3s ease;
+  position: relative;
+  padding-bottom: 4px;
 }
 
-.navLinks a:hover {
-  color: var(--secondary-color);
+/* Efecto de subrayado al pasar el ratón */
+.navLinks a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--secondary-color);
+  transition: width 0.3s ease;
+}
+
+.navLinks a:hover::after {
+  width: 100%;
 }

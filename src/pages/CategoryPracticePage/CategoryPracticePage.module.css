@@ -1,0 +1,37 @@
+/* src/pages/CategoryPracticePage/CategoryPracticePage.module.css */
+.pageContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 2rem;
+  font-weight: 500;
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+.title {
+  font-size: 3rem;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 3rem;
+  text-transform: capitalize;
+}
+
+.highlight {
+  color: var(--secondary-color);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2rem;
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,0 +1,66 @@
+/* src/components/PracticeCard/PracticeCard.module.css */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%;
+  border: 3px solid transparent; /* Borde inicial transparente para una transición suave */
+  position: relative; /* Clave para posicionar el checkmark */
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(74, 71, 163, 0.15);
+  border-color: var(--secondary-color);
+}
+
+.cardImage {
+  height: 80px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+}
+
+.cardLabel {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.cardDescription {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+  flex-grow: 1;
+}
+
+/* --- NUEVOS ESTILOS PARA EL ESTADO "COMPLETADO" --- */
+.card.completed {
+  border-color: var(--green-accent);
+  background-color: #f0fff4; /* Un fondo verde muy sutil */
+}
+
+.card.completed .cardImage,
+.card.completed .cardLabel,
+.card.completed .cardDescription {
+  opacity: 0.6; /* Hacemos que el contenido se vea un poco atenuado */
+}
+
+.checkmark {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 2.5rem; /* Hacemos el check más grande */
+  color: var(--green-accent);
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+

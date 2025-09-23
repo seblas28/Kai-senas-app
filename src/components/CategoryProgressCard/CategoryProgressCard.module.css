@@ -1,0 +1,79 @@
+/* src/components/CategoryProgressCard/CategoryProgressCard.module.css */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 32px rgba(74, 71, 163, 0.2);
+}
+
+.cardImage {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Asegura que el contenido llene el espacio */
+}
+
+.cardTitle {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  margin: 0 0 1rem 0;
+}
+
+.progressInfo {
+  margin-bottom: 1.5rem;
+}
+
+.progressInfo p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.progressBarBackground {
+  width: 100%;
+  height: 12px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(9deg, var(--green-accent) 0%, var(--secondary-color) 100%);
+  border-radius: 6px;
+  transition: width 0.5s ease-out;
+}
+
+.practiceButton {
+  display: block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  background-color: var(--secondary-color);
+  color: white;
+  margin-top: auto; /* Empuja el botón hacia abajo */
+}
+
+.practiceButton:hover {
+  background-color: var(--primary-color);
+  transform: scale(1.05);
+}
+

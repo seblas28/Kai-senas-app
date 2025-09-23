@@ -1,16 +1,16 @@
 // src/components/PracticeView/PracticeView.tsx
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from 'react-router-dom';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import * as tf from '@tensorflow/tfjs';
 import styles from "./PracticeView.module.css";
+import { speak } from '../../utils/speech';
+import { useSpeech } from "../../context/SpeechContext";
 
-interface PracticeViewProps { 
-  targetVowel: string; 
-}
 
 type Landmark = { x: number; y: number; z: number };
 
-const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
+const PracticeView: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isScanningRef = useRef(false);
@@ -18,23 +18,33 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
   const animationFrameId = useRef<number | null>(null);
   const bestSessionScoreRef = useRef<number>(0);
 
+  const { category, sign } = useParams<{ category: string; sign: string }>();
+  const { isSpeechEnabled } = useSpeech();
+
   // Estado para controlar la carga inicial de los modelos
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Cargando IA y modelos...");
-
   const [iaModel, setIaModel] = useState<tf.LayersModel | null>(null);
   const [labels, setLabels] = useState<string[]>([]);
-  const [predictedVowel, setPredictedVowel] = useState<string>('...');
+  const [predictedSign, setPredictedSign] = useState<string>('...');
   const [confidence, setConfidence] = useState<number>(0);
   const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isTaskCompleted, setIsTaskCompleted] = useState(false);
 
   const CONFIDENCE_THRESHOLD = 70; // Umbral de confianza del 70%
 
   useEffect(() => {
+    if (sign){
+      speak(`Vamos a practicar ${sign}`, isSpeechEnabled);
+    }
+
     const setup = async () => {
       try {
+        if(!category) return;
+
+        setIsLoading(true);
         setLoadingMessage("Cargando detector de manos...");
         const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
         const landmarker = await HandLandmarker.createFromOptions(vision, {
@@ -43,25 +53,28 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
         });
         setHandLandmarker(landmarker);
 
+        const modelUrl = `/tfjs_${category}/model.json`;
+        const labelsUrl = `/labels_${category}.json`;
+
         setLoadingMessage("Cargando modelo de IA...");
-        const model = await tf.loadLayersModel('/tfjs_model/model.json');
+        const model = await tf.loadLayersModel(modelUrl);
         setIaModel(model);
-        console.log("Modelo de IA cargado exitosamente.");
+        console.log(`Modelo de IA para [${category}] cargado.`);
 
         setLoadingMessage("Cargando etiquetas...");
-        const labelsData = await fetch('/labels.json').then(res => res.json());
+        const labelsData = await fetch(labelsUrl).then(res => res.json());
         setLabels(labelsData);
-        console.log("Etiquetas cargadas:", labelsData);
+        console.log(`Etiquetas para [${category}] cargadas:`, labelsData);
 
         setIsLoading(false);
 
       } catch (error) {
-        console.error("Error fatal durante la inicialización:", error);
+        console.error(`Error fatal durante la inicialización para la categoría [${category}]:`, error);
         setLoadingMessage("Error al cargar los modelos. Refresca la página.");
       }
     };
     setup();
-  }, []);
+  }, [category, sign, isSpeechEnabled]);
 
   const startCamera = async () => {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
@@ -69,6 +82,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
       videoRef.current.srcObject = stream;
       videoRef.current.addEventListener("loadeddata", () => {
         setIsCameraOn(true);
+
+        speak("Cámara encendida.", isSpeechEnabled);
       });
     }
   };
@@ -80,14 +95,17 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
+    speak("Cámara apagada.", isSpeechEnabled);
   };
 
   const startScan = () => {
+    setIsTaskCompleted(false);
     setIsScanning(true);
     isScanningRef.current = true;
     bestSessionScoreRef.current = 0;
     sessionStartTimeRef.current = Date.now();
     predictWebcam();
+    speak("Iniciando escaneo. Realiza la seña mostrada.", isSpeechEnabled);
   };
 
   const stopScan = () => {
@@ -96,17 +114,19 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     const sessionTime = (Date.now() - sessionStartTimeRef.current) / 1000;
     saveProgress(bestSessionScoreRef.current, sessionTime);
+    speak("Escaneo detenido", isSpeechEnabled);
   };
 
   const saveProgress = (currentScore: number, practiceTime: number) => {
+    if (!sign) return;
     const progressData = JSON.parse(localStorage.getItem('progressData') || '{}');
     const recentSessions = JSON.parse(localStorage.getItem('recentSessions') || '[]');
-    const vowelData = progressData[targetVowel] || { bestScore: 0, sessions: 0, totalTime: 0 };
-    vowelData.bestScore = Math.max(vowelData.bestScore, currentScore);
-    vowelData.sessions += 1;
-    vowelData.totalTime += Math.round(practiceTime);
-    progressData[targetVowel] = vowelData;
-    const newSession = { vowel: targetVowel, score: currentScore, timestamp: Date.now() };
+    const signData = progressData[sign] || { bestScore: 0, sessions: 0, totalTime: 0 };
+    signData.bestScore = Math.max(signData.bestScore, currentScore);
+    signData.sessions += 1;
+    signData.totalTime += Math.round(practiceTime);
+    progressData[sign] = signData;
+    const newSession = { label: sign, score: currentScore, timestamp: Date.now() };
     recentSessions.unshift(newSession);
     localStorage.setItem('progressData', JSON.stringify(progressData));
     localStorage.setItem('recentSessions', JSON.stringify(recentSessions.slice(0, 20)));
@@ -138,12 +158,21 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
 
       if (results.landmarks && results.landmarks.length > 0) {
         const handLandmarks = results.landmarks[0];
-        const prediction = predictVowel(handLandmarks);
+        const prediction = predictSign(handLandmarks);
         if (prediction) {
           const currentConfidence = prediction.confidence * 100;
-          setPredictedVowel(prediction.vowel);
+          setPredictedSign(prediction.sign);
           setConfidence(currentConfidence);
-          if (currentConfidence > bestSessionScoreRef.current) bestSessionScoreRef.current = currentConfidence;
+          if(
+            !isTaskCompleted && prediction.sign === sign && currentConfidence >= 97
+          ) {
+            setIsTaskCompleted(true);
+            speak(`¡Muy bien! Has completado ${sign}`, isSpeechEnabled);
+          }
+
+          if (currentConfidence > bestSessionScoreRef.current){
+             bestSessionScoreRef.current = currentConfidence;
+          }
         }
         for (const landmarks of results.landmarks) {
           drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: "#00FF00", lineWidth: 5 });
@@ -160,7 +189,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
     }
   };
 
-  const predictVowel = (landmarks: Landmark[]) => {
+  const predictSign = (landmarks: Landmark[]) => {
     if (!iaModel || !labels || labels.length === 0) return null;
     const baseX = landmarks[0].x;
     const baseY = landmarks[0].y;
@@ -173,7 +202,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
     if (maxConfidenceIndex < 0 || maxConfidenceIndex >= labels.length) return null;
     const predictedLabel = labels[maxConfidenceIndex];
     const maxConfidence = predictionData[maxConfidenceIndex];
-    return { vowel: predictedLabel, confidence: maxConfidence };
+    return { sign: predictedLabel, confidence: maxConfidence };
   };
 
   return (
@@ -188,19 +217,17 @@ const PracticeView: React.FC<PracticeViewProps> = ({ targetVowel }) => {
 
       <div className={styles.similarityContainer}>
         <p className={styles.similarityText}>
-          {confidence > CONFIDENCE_THRESHOLD && predictedVowel !== 'Nulo' ? (
+          {confidence > CONFIDENCE_THRESHOLD && predictedSign !== 'Nulo' ? (
             <>
-              Predicción: <span className={styles.predictedVowel}>{predictedVowel}</span>
+              Predicción: <span className={styles.predictedSign}>{predictedSign}</span>
               (Confianza: {confidence.toFixed(0)}%)
             </>
-          ) : (
-            "Realiza la seña..."
-          )}
+          ) : ( "Realiza la seña..." )}
         </p>
         <div className={styles.progressBarBackground}>
           <div 
-            className={`${styles.progressBarFill} ${predictedVowel === targetVowel && confidence > CONFIDENCE_THRESHOLD ? styles.correct : ''}`}
-            style={{ width: `${predictedVowel === 'Nulo' ? 0 : confidence}%` }}
+            className={`${styles.progressBarFill} ${predictedSign === sign && confidence > CONFIDENCE_THRESHOLD ? styles.correct : ''}`}
+            style={{ width: `${predictedSign === 'Nulo' ? 0 : confidence}%` }}
           ></div>
         </div>
       </div>

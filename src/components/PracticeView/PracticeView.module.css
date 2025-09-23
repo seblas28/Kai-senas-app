@@ -35,6 +35,8 @@
   align-items: center;
   color: #a0a0a0;
   font-weight: 500;
+  padding: 1rem;
+  text-align: center;
 }
 
 .similarityContainer {
@@ -72,7 +74,7 @@
 }
 
 .progressBarFill.correct {
-  background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%); /* Color de éxito */
+  background: linear-gradient(90deg, var(--green-accent) 0%, var(--secondary-color) 100%); /* Color de éxito */
 }
 
 .controls {
