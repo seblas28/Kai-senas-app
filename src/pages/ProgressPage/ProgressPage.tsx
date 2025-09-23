@@ -74,9 +74,9 @@ const ProgressPage: React.FC = () => {
 
     const welcomeTimeout = setTimeout(() => {
       if (summary.completedCourses === categoryData.length) {
-        speak("¡Felicidades! Has completado todos los cursos.", isSpeechEnabled);
+        if(isSpeechEnabled) speak("¡Felicidades! Has completado todos los cursos.");
       } else {
-        speak("Este es tu panel de progreso. ¡Sigue aprendiendo!", isSpeechEnabled);
+        if(isSpeechEnabled) speak("Este es tu panel de progreso. ¡Sigue aprendiendo!");
       }
     }, 500);
 
@@ -89,7 +89,7 @@ const ProgressPage: React.FC = () => {
     setShowConfirm(false);
     loadProgress();
 
-    speak("Todo tu progreso ha sido reiniciado.", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Todo tu progreso ha sido reiniciado.");
   };
 
   return (

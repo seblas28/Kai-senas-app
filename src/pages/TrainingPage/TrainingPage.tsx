@@ -46,7 +46,7 @@ const TrainingPage: React.FC = () => {
         setSelectedLabel(allLabels[0]);
       }
 
-      speak(`Entrenando la categoría ${category}.`, isSpeechEnabled);
+      if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
 
     const token = sessionStorage.getItem('auth-token');
@@ -72,14 +72,14 @@ const TrainingPage: React.FC = () => {
         isCameraOnRef.current = true;
         predictWebcam();
 
-        speak("Cámara encendida. Selecciona una etiqueta y captura muestras.", isSpeechEnabled);
+        if(isSpeechEnabled) speak("Cámara encendida. Selecciona una etiqueta y captura muestras.");
       });
     }
   };
 
   const stopCamera = () => {
     if (!isCameraOnRef.current) {
-      speak("La cámara ya está apagada.", isSpeechEnabled);
+      if(isSpeechEnabled) speak("La cámara ya está apagada.");
     }
     isCameraOnRef.current = false;
     setIsCameraOn(false);
@@ -141,13 +141,13 @@ const TrainingPage: React.FC = () => {
 
   const handleLabelSelect = (label: string) => {
     setSelectedLabel(label);
-    speak(`Seleccionado: ${label}`, isSpeechEnabled);
+    if(isSpeechEnabled) speak(`Seleccionado: ${label}`);
   }
 
   const handleClearData = () => {
     setTrainingData([]);
     setFeedbackMessage('');
-    speak("Datos de entrenamiento limpiados.", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Datos de entrenamiento limpiados.");
   }
 
   const handleBurstCapture = async () => {
@@ -158,7 +158,7 @@ const TrainingPage: React.FC = () => {
     }
     setIsBursting(true);
 
-    speak("Iniciando captura en ráfaga.", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Iniciando captura en ráfaga.");
 
     for (let i = 3; i > 0; i--) {
       setFeedbackMessage(`Prepárate en ${i}...`);
@@ -178,7 +178,7 @@ const TrainingPage: React.FC = () => {
     });
     const completionMessage = `Captura de ${selectedLabel} completada.`;
     setFeedbackMessage(completionMessage);
-    speak(completionMessage, isSpeechEnabled);
+    if(isSpeechEnabled) speak(completionMessage);
     setIsBursting(false);
     setTimeout(() => setFeedbackMessage(''), 4000);
   };
@@ -191,7 +191,7 @@ const TrainingPage: React.FC = () => {
 
     setIsSending(true);
     setFeedbackMessage('Enviando datos al servidor...');
-    speak("Enviando datos para entrenar el modelo.", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Enviando datos para entrenar el modelo.");
 
     try {
       const payload = {

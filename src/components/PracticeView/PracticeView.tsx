@@ -36,8 +36,8 @@ const PracticeView: React.FC = () => {
   const CONFIDENCE_THRESHOLD = 70; // Umbral de confianza del 70%
 
   useEffect(() => {
-    if (sign){
-      speak(`Vamos a practicar ${sign}`, isSpeechEnabled);
+    if (sign && isSpeechEnabled) {
+      speak(`Vamos a practicar ${sign}`);
     }
 
     const setup = async () => {
@@ -83,7 +83,7 @@ const PracticeView: React.FC = () => {
       videoRef.current.addEventListener("loadeddata", () => {
         setIsCameraOn(true);
 
-        speak("Cámara encendida.", isSpeechEnabled);
+        if (isSpeechEnabled) speak("Cámara encendida.");
       });
     }
   };
@@ -95,7 +95,7 @@ const PracticeView: React.FC = () => {
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
-    speak("Cámara apagada.", isSpeechEnabled);
+    if (isSpeechEnabled) speak("Cámara apagada.");
   };
 
   const startScan = () => {
@@ -105,7 +105,7 @@ const PracticeView: React.FC = () => {
     bestSessionScoreRef.current = 0;
     sessionStartTimeRef.current = Date.now();
     predictWebcam();
-    speak("Iniciando escaneo. Realiza la seña mostrada.", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Iniciando escaneo. Realiza la seña mostrada.");
   };
 
   const stopScan = () => {
@@ -114,7 +114,7 @@ const PracticeView: React.FC = () => {
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     const sessionTime = (Date.now() - sessionStartTimeRef.current) / 1000;
     saveProgress(bestSessionScoreRef.current, sessionTime);
-    speak("Escaneo detenido", isSpeechEnabled);
+    if(isSpeechEnabled) speak("Escaneo detenido");
   };
 
   const saveProgress = (currentScore: number, practiceTime: number) => {
@@ -167,7 +167,7 @@ const PracticeView: React.FC = () => {
             !isTaskCompleted && prediction.sign === sign && currentConfidence >= 97
           ) {
             setIsTaskCompleted(true);
-            speak(`¡Muy bien! Has completado ${sign}`, isSpeechEnabled);
+            if(isSpeechEnabled) speak(`¡Muy bien! Has completado ${sign}`);
           }
 
           if (currentConfidence > bestSessionScoreRef.current){
