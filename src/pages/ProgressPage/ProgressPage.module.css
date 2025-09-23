@@ -9,19 +9,26 @@
   font-size: 3rem;
   color: var(--primary-color);
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  font-size: 1.8rem;
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--secondary-color);
-  padding-bottom: 0.5rem;
+  font-size: 1.2rem;
+  text-align: center;
+  color: #666;
+  margin-bottom: 3rem;
 }
 
 .section {
   margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
 }
 
 .statsGrid {
@@ -30,21 +37,18 @@
   gap: 1.5rem;
 }
 
-.columns {
-  display: flex;
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.column {
-  flex: 1;
-  min-width: 300px;
 }
 
 .list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 800px; /* Centra la lista para que se vea mejor */
+  margin: 0 auto;
 }
 
 .listItem {
@@ -71,37 +75,24 @@
   font-size: 0.85rem;
 }
 
-.cardGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-}
-
-.cardLink{
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-}
-
-.allCompleted {
+.noHistory {
   text-align: center;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--green-accent);
-  background-color: #e8fadf;
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  color: #666;
 }
 
+/* --- ESTILOS DE LA ZONA DE PELIGRO Y MODAL (sin cambios) --- */
 .dangerZone {
-  margin-top: 3rem;
+  margin-top: 2rem;
   padding: 1.5rem;
   border: 2px solid #ff4d4d;
   border-radius: 12px;
   background-color: #fff5f5;
 }
 
-.dangerZone .subtitle {
+.dangerZone .sectionTitle {
   color: #cc0000;
   border-bottom-color: #ffb3b3;
 }
