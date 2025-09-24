@@ -48,9 +48,7 @@ const TrainingPage: React.FC = () => {
 
       if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
-
-    const token = sessionStorage.getItem('auth-token');
-    if (!token) { window.location.href = '/training-login'; }
+    
     const createHandLandmarker = async () => {
       const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
       const landmarker = await HandLandmarker.createFromOptions(vision, {
