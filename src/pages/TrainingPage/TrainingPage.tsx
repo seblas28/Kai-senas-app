@@ -14,7 +14,6 @@ const SAMPLES_PER_BURST = 30;
 const CAPTURE_INTERVAL_MS = 100;
 
 const TrainingPage: React.FC = () => {
-  // Obtiene la categoría de la URL (ej: "vocales", "numeros")
   const { category } = useParams<{ category: string }>();
   const { isSpeechEnabled } = useSpeech();
   const navigate = useNavigate();
@@ -59,12 +58,14 @@ const TrainingPage: React.FC = () => {
       setHandLandmarker(landmarker);
     };
     createHandLandmarker();
-    return () => stopCamera();
+    return () => stopCamera(false);
   }, [category, isSpeechEnabled]);
 
   const handleGoHome = () => {
-    stopCamera();
-    navigate('/');
+    stopCamera(true);
+    setTimeout(() => {
+      navigate('/');
+    }, 700);
   }
 
   const startCamera = async () => {
@@ -81,10 +82,15 @@ const TrainingPage: React.FC = () => {
     }
   };
 
-  const stopCamera = () => {
+  const stopCamera = (shouldSpeak: boolean = true) => {
     if (!isCameraOnRef.current) {
-      if(isSpeechEnabled) speak("La cámara ya está apagada.");
+      return; 
     }
+    
+    if (shouldSpeak && isSpeechEnabled) {
+      speak("Cámara apagada.");
+    }
+    
     isCameraOnRef.current = false;
     setIsCameraOn(false);
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -253,7 +259,7 @@ const TrainingPage: React.FC = () => {
             <hr className={styles.divider}/>
             {!isCameraOn ? 
               <button onClick={startCamera} className={styles.actionButton} disabled={isBursting || isSending}>Encender Cámara</button> :
-              <button onClick={stopCamera} className={`${styles.actionButton} ${styles.stopButton}`} disabled={isBursting || isSending}>Apagar Cámara</button>
+              <button onClick={() => stopCamera(true)} className={`${styles.actionButton} ${styles.stopButton}`} disabled={isBursting || isSending}>Apagar Cámara</button>
             }
             <button onClick={handleBurstCapture} disabled={!isCameraOn || isBursting || isSending} className={`${styles.actionButton} ${styles.burstButton}`}>
               Capturar Ráfaga ({SAMPLES_PER_BURST})
