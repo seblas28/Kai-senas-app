@@ -1,6 +1,6 @@
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getSignsByCategory } from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
@@ -17,6 +17,7 @@ const TrainingPage: React.FC = () => {
   // Obtiene la categoría de la URL (ej: "vocales", "numeros")
   const { category } = useParams<{ category: string }>();
   const { isSpeechEnabled } = useSpeech();
+  const navigate = useNavigate();
 
   const [categoryLabels, setCategoryLabels] = useState<string[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<string>('');
@@ -48,7 +49,7 @@ const TrainingPage: React.FC = () => {
 
       if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
-    
+
     const createHandLandmarker = async () => {
       const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
       const landmarker = await HandLandmarker.createFromOptions(vision, {
@@ -60,6 +61,11 @@ const TrainingPage: React.FC = () => {
     createHandLandmarker();
     return () => stopCamera();
   }, [category, isSpeechEnabled]);
+
+  const handleGoHome = () => {
+    stopCamera();
+    navigate('/');
+  }
 
   const startCamera = async () => {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
@@ -241,7 +247,9 @@ const TrainingPage: React.FC = () => {
           </div>
 
           <div className={styles.actions}>
-            <Link to="/" className={styles.backButton}>← Volver al Inicio</Link>
+            <button onClick={handleGoHome} className={styles.backButton}>
+              ← Volver al Inicio
+            </button>
             <hr className={styles.divider}/>
             {!isCameraOn ? 
               <button onClick={startCamera} className={styles.actionButton} disabled={isBursting || isSending}>Encender Cámara</button> :
