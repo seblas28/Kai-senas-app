@@ -191,3 +191,36 @@
   margin: 0;
 }
 
+.trainButton {
+  background-color: #6f42c1; /* Púrpura */
+  font-weight: bold;
+}
+.trainButton:hover:not(:disabled) {
+  background-color: #5a32a3;
+}
+
+.downloadButton {
+  background-color: #28a745; /* Verde */
+}
+.downloadButton:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.logContainer {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.logBox {
+  background-color: #2c2c2c; /* Fondo oscuro para los logs */
+  color: #00ff00; /* Texto verde, estilo terminal */
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 1rem;
+  height: 200px;
+  overflow-y: scroll;
+  text-align: left;
+  font-family: monospace;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}

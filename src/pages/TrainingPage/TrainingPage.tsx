@@ -36,17 +36,15 @@ const TrainingPage: React.FC = () => {
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    // Carga las etiquetas correspondientes a la categoría de la URL
     if (category) {
       const signs = getSignsByCategory(category);
       const labels = signs.map(sign => sign.label);
-      const allLabels = [...labels, 'Nulo']; // Siempre añadimos 'Nulo' para robustez
+      const allLabels = [...labels, 'Nulo'];
       setCategoryLabels(allLabels);
       if (allLabels.length > 0) {
         setSelectedLabel(allLabels[0]);
       }
-
-      if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
+      if (isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
 
     const createHandLandmarker = async () => {
@@ -58,15 +56,20 @@ const TrainingPage: React.FC = () => {
       setHandLandmarker(landmarker);
     };
     createHandLandmarker();
-    return () => stopCamera(false);
+    
+    // La función de limpieza se encarga de apagar la cámara al salir de la página
+    return () => {
+      stopCamera(false); // Pasamos 'false' para que no hable en la limpieza automática
+    };
   }, [category, isSpeechEnabled]);
 
   const handleGoHome = () => {
-    stopCamera(true);
+    stopCamera(true); // Apagamos la cámara y le decimos que SÍ hable
+    // Usamos un pequeño retraso para dar tiempo a que la voz termine antes de navegar
     setTimeout(() => {
       navigate('/');
     }, 700);
-  }
+  };
 
   const startCamera = async () => {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
@@ -76,16 +79,13 @@ const TrainingPage: React.FC = () => {
         setIsCameraOn(true);
         isCameraOnRef.current = true;
         predictWebcam();
-
-        if(isSpeechEnabled) speak("Cámara encendida. Selecciona una etiqueta y captura muestras.");
+        if (isSpeechEnabled) speak("Cámara encendida.");
       });
     }
   };
 
   const stopCamera = (shouldSpeak: boolean = true) => {
-    if (!isCameraOnRef.current) {
-      return; 
-    }
+    if (!isCameraOnRef.current) return; // Si ya está apagada, no hacemos nada
     
     if (shouldSpeak && isSpeechEnabled) {
       speak("Cámara apagada.");
@@ -103,7 +103,7 @@ const TrainingPage: React.FC = () => {
   const predictWebcam = () => {
     if (!isCameraOnRef.current || !handLandmarker || !videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
-    if (video.readyState < 2) {
+    if (video.readyState < 2 || video.videoWidth === 0) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
       return;
     }
@@ -152,13 +152,13 @@ const TrainingPage: React.FC = () => {
   const handleLabelSelect = (label: string) => {
     setSelectedLabel(label);
     if(isSpeechEnabled) speak(`Seleccionado: ${label}`);
-  }
+  };
 
   const handleClearData = () => {
     setTrainingData([]);
     setFeedbackMessage('');
     if(isSpeechEnabled) speak("Datos de entrenamiento limpiados.");
-  }
+  };
 
   const handleBurstCapture = async () => {
     if (!lastCapturedHand) {
@@ -167,9 +167,7 @@ const TrainingPage: React.FC = () => {
       return;
     }
     setIsBursting(true);
-
     if(isSpeechEnabled) speak("Iniciando captura en ráfaga.");
-
     for (let i = 3; i > 0; i--) {
       setFeedbackMessage(`Prepárate en ${i}...`);
       await delay(1000);
@@ -195,29 +193,24 @@ const TrainingPage: React.FC = () => {
   
   const handleSendDataAndTrain = async () => {
     if (trainingData.length === 0) return alert("No hay datos para enviar.");
-    
-    // Elige qué servidor usar
-    const final_url = "http://localhost:5001/receive_data"; // O tu URL de Render
-
+    const final_url = "http://localhost:5001/receive_data";
     setIsSending(true);
     setFeedbackMessage('Enviando datos al servidor...');
     if(isSpeechEnabled) speak("Enviando datos para entrenar el modelo.");
-
     try {
-      const payload = {
-        category: category,
-        data: trainingData
-      };
+      const payload = { category: category, data: trainingData };
       const response = await fetch(final_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
-      setFeedbackMessage('¡Datos enviados! Revisa la terminal del servidor para ver el progreso.');
+      setFeedbackMessage('¡Datos enviados! Revisa la terminal del servidor.');
+      if(isSpeechEnabled) speak("Datos enviados con éxito.");
     } catch (error) {
       console.error('Error al enviar datos:', error);
       setFeedbackMessage('Error al conectar con el servidor. ¿Está en ejecución?');
+      if(isSpeechEnabled) speak("Error al conectar con el servidor.");
     } finally {
       setIsSending(false);
     }
@@ -232,13 +225,11 @@ const TrainingPage: React.FC = () => {
           {feedbackMessage && <div className={styles.feedbackOverlay}>{feedbackMessage}</div>}
           {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
         </div>
-
         <div className={styles.controls}>
           <h1 className={styles.title}>
             Entrenando Categoría: <span className={styles.highlight}>{category}</span>
           </h1>
           <p>Selecciona una seña de esta categoría y captura muestras.</p>
-          
           <div className={styles.labelSelector}>
             {categoryLabels.map(label => (
               <button 
@@ -251,7 +242,6 @@ const TrainingPage: React.FC = () => {
               </button>
             ))}
           </div>
-
           <div className={styles.actions}>
             <button onClick={handleGoHome} className={styles.backButton}>
               ← Volver al Inicio
