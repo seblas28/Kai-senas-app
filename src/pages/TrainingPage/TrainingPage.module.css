@@ -246,7 +246,25 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
-/* ... (el resto de los estilos de los botones se mantienen) ... */
+
+.backButton {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid #e0e0e0;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.backButton:hover {
+  background-color: #f0f0f0;
+  border-color: var(--secondary-color);
+}
+
 .feedbackOverlay {
   position: absolute;
   top: 0; left: 0;
