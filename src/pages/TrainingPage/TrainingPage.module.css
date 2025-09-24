@@ -6,6 +6,7 @@
   min-height: calc(100vh - 150px);
   padding: 2rem;
 }
+
 .trainingPanel {
   display: flex;
   gap: 2rem;
@@ -16,6 +17,7 @@
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.1);
 }
+
 .videoContainer {
   flex: 1.5;
   position: relative;
@@ -28,32 +30,44 @@
   justify-content: center; 
   align-items: center;
 }
+
 .placeholder { 
   color: #a0a0a0; 
   font-weight: 500; 
 }
+
 .video, .canvas {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
   transform: rotateY(180deg);
 }
+
 .controls {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .title {
   color: var(--primary-color);
   margin-top: 0;
+  text-transform: capitalize;
 }
-.vowelSelector {
+
+.highlight {
+  color: var(--secondary-color);
+}
+
+.labelSelector {
   display: flex;
   gap: 0.5rem;
   margin: 1.5rem 0;
+  flex-wrap: wrap;
 }
-.vowelButton {
-  flex: 1;
+
+.labelButton {
+  flex-grow: 1;
   padding: 0.8rem;
   font-size: 1rem;
   font-weight: bold;
@@ -63,19 +77,32 @@
   background: #f0f0f0;
   transition: all 0.2s ease;
 }
-.vowelButton.selected {
+
+.labelButton.selected {
   border-color: var(--secondary-color);
   background: #e9e8f8;
   color: var(--primary-color);
 }
+
+.nuloButton {
+  background-color: #6c757d;
+  color: white;
+  border-color: #5a6268;
+}
+
+.nuloButton.selected {
+  background-color: #495057;
+  border-color: #343a40;
+}
+
 .actions {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-top: auto;
 }
-.actionButton {
-  background-color: var(--secondary-color);
+
+.actionButton, .backButton {
   color: white; 
   border: none; 
   padding: 1rem;
@@ -84,15 +111,37 @@
   border-radius: 8px;
   cursor: pointer; 
   transition: all 0.3s ease;
+  text-align: center;
 }
+
+.actionButton {
+  background-color: var(--secondary-color);
+}
+
 .actionButton:hover:not(:disabled) { 
   background-color: var(--primary-color); 
 }
-.actionButton:disabled { 
+
+.actionButton:disabled, .backButton:disabled { 
   background-color: #ccc; 
   cursor: not-allowed;
   opacity: 0.7;
+  border-color: #ccc;
+  color: #888;
 }
+
+.backButton {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid #e0e0e0;
+  padding: 0.8rem;
+}
+
+.backButton:hover {
+  background-color: #f0f0f0;
+  border-color: var(--secondary-color);
+}
+
 .stopButton { 
   background-color: #ff4d4d; 
 }
@@ -118,152 +167,6 @@
 .sendButton:hover:not(:disabled) {
   background-color: #218838;
 }
-.feedbackOverlay {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  padding: 2rem;
-  z-index: 10;
-  border-radius: 12px;
-}
-.divider {
-  border: none;
-  border-top: 1px solid #eee;
-  margin: 0;
-}
-
-.vowelButton.nuloButton {
-  background-color: #6c757d; /* Gris */
-  color: white;
-  border-color: #5a6268;
-}
-
-.vowelButton.nuloButton.selected {
-  background-color: #495057;
-  border-color: #343a40;
-}
-
-/* src/pages/TrainingPage/TrainingPage.module.css */
-.pageWrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 150px);
-  padding: 2rem;
-}
-.trainingPanel {
-  display: flex;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1200px;
-  background: var(--card-bg);
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-}
-.videoContainer {
-  flex: 1.5;
-  position: relative;
-  min-width: 500px;
-  padding-top: 45%;
-  background: #2c2c2c;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex; 
-  justify-content: center; 
-  align-items: center;
-}
-.placeholder { 
-  color: #a0a0a0; 
-  font-weight: 500; 
-}
-.video, .canvas {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  transform: rotateY(180deg);
-}
-.controls {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.title {
-  color: var(--primary-color);
-  margin-top: 0;
-  text-transform: capitalize; /* Pone la primera letra de la categoría en mayúscula */
-}
-.highlight {
-  color: var(--secondary-color);
-}
-.labelSelector {
-  display: flex;
-  gap: 0.5rem;
-  margin: 1.5rem 0;
-  flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no caben */
-}
-.labelButton {
-  flex-grow: 1; /* Hace que los botones se expandan para llenar el espacio */
-  padding: 0.8rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 2px solid #ccc;
-  background: #f0f0f0;
-  transition: all 0.2s ease;
-}
-.labelButton.selected {
-  border-color: var(--secondary-color);
-  background: #e9e8f8;
-  color: var(--primary-color);
-}
-.nuloButton {
-  background-color: #6c757d;
-  color: white;
-  border-color: #5a6268;
-}
-.nuloButton.selected {
-  background-color: #495057;
-  border-color: #343a40;
-}
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: auto;
-}
-.actionButton:disabled { 
-  background-color: #ccc; 
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.backButton {
-  background-color: transparent;
-  color: var(--primary-color);
-  border: 2px solid #e0e0e0;
-  padding: 0.8rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-.backButton:hover {
-  background-color: #f0f0f0;
-  border-color: var(--secondary-color);
-}
 
 .feedbackOverlay {
   position: absolute;
@@ -281,6 +184,7 @@
   z-index: 10;
   border-radius: 12px;
 }
+
 .divider {
   border: none;
   border-top: 1px solid #eee;
