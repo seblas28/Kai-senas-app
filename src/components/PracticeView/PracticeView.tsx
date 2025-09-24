@@ -16,7 +16,6 @@ const PracticeView: React.FC = () => {
   const isScanningRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(0);
   const animationFrameId = useRef<number | null>(null);
-  const bestSessionScoreRef = useRef<number>(0);
 
   const { category, sign } = useParams<{ category: string; sign: string }>();
   const { isSpeechEnabled } = useSpeech();
@@ -102,7 +101,6 @@ const PracticeView: React.FC = () => {
     setIsTaskCompleted(false);
     setIsScanning(true);
     isScanningRef.current = true;
-    bestSessionScoreRef.current = 0;
     sessionStartTimeRef.current = Date.now();
     predictWebcam();
     if(isSpeechEnabled) speak("Iniciando escaneo. Realiza la seña mostrada.");
@@ -113,7 +111,7 @@ const PracticeView: React.FC = () => {
     setIsScanning(false);
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     const sessionTime = (Date.now() - sessionStartTimeRef.current) / 1000;
-    saveProgress(bestSessionScoreRef.current, sessionTime);
+    saveProgress(confidence, sessionTime);
     if(isSpeechEnabled) speak("Escaneo detenido");
   };
 
@@ -122,7 +120,7 @@ const PracticeView: React.FC = () => {
     const progressData = JSON.parse(localStorage.getItem('progressData') || '{}');
     const recentSessions = JSON.parse(localStorage.getItem('recentSessions') || '[]');
     const signData = progressData[sign] || { bestScore: 0, sessions: 0, totalTime: 0 };
-    signData.bestScore = Math.max(signData.bestScore, currentScore);
+    signData.bestScore = currentScore;
     signData.sessions += 1;
     signData.totalTime += Math.round(practiceTime);
     progressData[sign] = signData;
@@ -168,10 +166,6 @@ const PracticeView: React.FC = () => {
           ) {
             setIsTaskCompleted(true);
             if(isSpeechEnabled) speak(`¡Muy bien! Has completado ${sign}`);
-          }
-
-          if (currentConfidence > bestSessionScoreRef.current){
-             bestSessionScoreRef.current = currentConfidence;
           }
         }
         for (const landmarks of results.landmarks) {
