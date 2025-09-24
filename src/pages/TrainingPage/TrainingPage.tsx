@@ -59,13 +59,12 @@ const TrainingPage: React.FC = () => {
     
     // La función de limpieza se encarga de apagar la cámara al salir de la página
     return () => {
-      stopCamera(false); // Pasamos 'false' para que no hable en la limpieza automática
+      stopCamera(false);
     };
   }, [category, isSpeechEnabled]);
 
   const handleGoHome = () => {
-    stopCamera(true); // Apagamos la cámara y le decimos que SÍ hable
-    // Usamos un pequeño retraso para dar tiempo a que la voz termine antes de navegar
+    stopCamera(true);
     setTimeout(() => {
       navigate('/');
     }, 700);
