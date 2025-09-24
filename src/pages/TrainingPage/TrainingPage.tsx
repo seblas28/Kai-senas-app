@@ -1,6 +1,6 @@
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getSignsByCategory } from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
