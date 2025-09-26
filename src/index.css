@@ -3,9 +3,35 @@
   --primary-color: #4a47a3;
   --secondary-color: #706fd3;
   --background-color: #f4f4f9;
-  --text-color: #333;
   --card-bg: #ffffff;
+  --text-color: #333;
+  --text-color-light: #666;
+  --border-color: #e0e0e0;
   --green-accent: #5ddc9a;
+
+  /* Colores para la zona de peligro */
+  --danger-bg: #fff5f5;
+  --danger-border: #ff4d4d;
+  --danger-text: #cc0000;
+  --danger-border-light: #ffb3b3;
+}
+
+/* --- TEMA OSCURO --- */
+body[data-theme="dark"] {
+  --primary-color: #9b99e5;
+  --secondary-color: #8280d4;
+  --background-color: #121212;
+  --card-bg: #1e1e1e;
+  --text-color: #e0e0e0;
+  --text-color-light: #a0a0a0;
+  --border-color: #333333;
+  --green-accent: #38a169;
+
+  /* Colores de la zona de peligro para el modo oscuro */
+  --danger-bg: rgba(255, 77, 77, 0.1);
+  --danger-border: #ff4d4d;
+  --danger-text: #ff8a8a;
+  --danger-border-light: #582c2c;
 }
 
 body {
@@ -17,6 +43,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color);
   color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;;
 }
 
 * {
@@ -30,9 +57,9 @@ html, body, #root {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ocupa como mínimo toda la altura de la pantalla */
+  min-height: 100vh;
 }
 
 .main-content {
-  flex-grow: 1; /* Esta es la regla más importante */
+  flex-grow: 1;
 }

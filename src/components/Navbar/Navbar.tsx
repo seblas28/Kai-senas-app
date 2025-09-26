@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Navbar.module.css';
-import SpeechToggleButton from '../SpeechToggleButton/SpeechToggleButton'; // <-- Importamos el nuevo botón
+import SpeechToggleButton from '../SpeechToggleButton/SpeechToggleButton';
+import ThemeToggleButton from '../ThemeToggleButton/ThemeToggleButton'; 
 
 const Navbar: React.FC = () => {
   return (
@@ -17,6 +18,8 @@ const Navbar: React.FC = () => {
             <li><Link to="/progreso">Mi Progreso</Link></li> 
           </ul>
           <SpeechToggleButton />
+          {/* Añadimos el botón de cambio de tema */}
+          <ThemeToggleButton />
         </div>
       </div>
     </nav>
