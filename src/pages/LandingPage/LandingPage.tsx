@@ -4,8 +4,12 @@ import styles from './LandingPage.module.css';
 import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { categoryData } from '../../data/signData';
 import { speak } from '../../utils/speech';
+import { useAuth } from '../../context/AuthContext';
 
 const LandingPage: React.FC = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   useEffect(() => {
     const welcomeTimeout = setTimeout(() => {
       speak("Bienvenido a KaiSeñas");
@@ -28,8 +32,9 @@ const LandingPage: React.FC = () => {
               key={category.id}
               title={category.title}
               imageSrc={category.imageSrc}
-              practiceLink={`/practice/${category.id}`}
+              practiceLink={category.id === 'matematicas' ? '/practice/matematicas' : `/practice/${category.id}`}
               trainLink={`/training/${category.id}`}
+              isAdmin={isAdmin}
             />
           ))}
         </div>

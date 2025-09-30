@@ -8,9 +8,10 @@ interface CategoryCardProps {
   imageSrc: string;
   practiceLink: string;
   trainLink: string;
+  isAdmin: boolean;
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLink, trainLink }) => {
+const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLink, trainLink, isAdmin }) => {
   return (
     <div className={styles.card}>
       <img src={imageSrc} alt={`Categoría ${title}`} className={styles.cardImage} />
@@ -18,9 +19,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLi
       <div className={styles.buttons}>
         {/* --- ¡CAMBIO REALIZADO AQUÍ! --- */}
         {/* El botón de Entrenar ahora aparece primero */}
-        <Link to={trainLink} className={styles.buttonSecondary}>
-          Entrenar IA
-        </Link>
+        {isAdmin && (
+          <Link to={trainLink} className={styles.buttonSecondary}>
+            Entrenar IA
+          </Link>
+        )}
         {/* El botón de Practicar ahora aparece segundo */}
         <Link to={practiceLink} className={styles.button}>
           Practicar

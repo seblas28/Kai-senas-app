@@ -20,16 +20,20 @@ import image10 from '../assets/numbers/10.png';
 
 import imagePlus from '../assets/math/plus.png';
 import imageMinus from '../assets/math/minus.png';
+import imageEqual from '../assets/math/equal.png';
 
 import categoryVowelsImg from '../assets/categories/vocales.png';
 import categoryNumbersImg from '../assets/categories/numeros.png';
 import categoryMathImg from '../assets/categories/matematicas.png';
+
 
 export interface SignInfo {
   label: string;
   imageSrc: string;
   description: string;
   category: 'vocales' | 'numeros' | 'matematicas';
+  isTwoHanded?: boolean;
+  type?: 'number' | 'operator' | 'equal'; 
 }
 
 // Interfaz para la información de cada categoría
@@ -50,28 +54,36 @@ export const categoryData: CategoryInfo[] = [
 // Un único array con TODAS las señas.
 export const allSignData: SignInfo[] = [
   // Vocales
-  { label: 'A', imageSrc: imageA, description: 'Mano cerrada en puño, pulgar al costado.', category: 'vocales' },
-  { label: 'E', imageSrc: imageE, description: 'Dedos curvados hacia la palma.', category: 'vocales' },
-  { label: 'I', imageSrc: imageI, description: 'Puño cerrado con el meñique extendido.', category: 'vocales' },
-  { label: 'O', imageSrc: imageO, description: 'Dedos unidos en forma circular.', category: 'vocales' },
-  { label: 'U', imageSrc: imageU, description: 'Índice y medio extendidos juntos.', category: 'vocales' },
+  { label: 'A', imageSrc: imageA, description: 'Mano cerrada en puño, pulgar al costado.', category: 'vocales', isTwoHanded: false },
+  { label: 'E', imageSrc: imageE, description: 'Dedos curvados hacia la palma.', category: 'vocales', isTwoHanded: false },
+  { label: 'I', imageSrc: imageI, description: 'Puño cerrado con el meñique extendido.', category: 'vocales', isTwoHanded: false },
+  { label: 'O', imageSrc: imageO, description: 'Dedos unidos en forma circular.', category: 'vocales', isTwoHanded: false },
+  { label: 'U', imageSrc: imageU, description: 'Índice y medio extendidos juntos.', category: 'vocales', isTwoHanded: false },
 
   // Números
-  { label: '1', imageSrc: image1, description: 'Dedo índice extendido.', category: 'numeros' },
-  { label: '2', imageSrc: image2, description: 'Índice y medio extendidos.', category: 'numeros' },
-  { label: '3', imageSrc: image3, description: 'Índice, medio y pulgar extendidos.', category: 'numeros' },
-  { label: '4', imageSrc: image4, description: 'Cuatro dedos extendidos, pulgar doblado.', category: 'numeros' },
-  { label: '5', imageSrc: image5, description: 'Mano abierta con todos los dedos extendidos.', category: 'numeros' },
-  { label: '6', imageSrc: image6, description: 'Pulgar y meñique tocándose.', category: 'numeros' },
-  { label: '7', imageSrc: image7, description: 'Pulgar, índice y medio extendidos.', category: 'numeros' },
-  { label: '8', imageSrc: image8, description: 'Índice, medio y anular extendidos.', category: 'numeros' },
-  { label: '9', imageSrc: image9, description: 'Índice y medio formando un círculo.', category: 'numeros' },
-  { label: '10', imageSrc: image10, description: 'Dedo pulgar levantado.', category: 'numeros' },
+  { label: '1', imageSrc: image1, description: 'Dedo índice extendido.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '2', imageSrc: image2, description: 'Índice y medio extendidos.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '3', imageSrc: image3, description: 'Índice, medio y pulgar extendidos.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '4', imageSrc: image4, description: 'Cuatro dedos extendidos, pulgar doblado.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '5', imageSrc: image5, description: 'Mano abierta con todos los dedos extendidos.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '6', imageSrc: image6, description: 'Pulgar y meñique tocándose.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '7', imageSrc: image7, description: 'Pulgar, índice y medio extendidos.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '8', imageSrc: image8, description: 'Índice, medio y anular extendidos.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '9', imageSrc: image9, description: 'Índice y medio formando un círculo.', category: 'numeros', isTwoHanded: false, type: 'number' },
+  { label: '10', imageSrc: image10, description: 'Dedo pulgar levantado.', category: 'numeros', isTwoHanded: false, type: 'number' },
 
   // Operaciones Matemáticas
-  { label: 'Suma', imageSrc: imagePlus, description: 'Seña para la operación de suma.', category: 'matematicas' },
-  { label: 'Resta', imageSrc: imageMinus, description: 'Seña para la operación de resta.', category: 'matematicas' },
+  { label: 'Suma', imageSrc: imagePlus, description: 'Seña para la operación de suma.', category: 'matematicas', isTwoHanded: true, type: 'operator' },
+  { label: 'Resta', imageSrc: imageMinus, description: 'Seña para la operación de resta.', category: 'matematicas', isTwoHanded: true, type: 'operator' },
+  { label: 'Igual', imageSrc: imageEqual, description: 'Seña para el signo igual.', category: 'matematicas', isTwoHanded: true, type: 'operator' },
 ];
+
+export const signTypeMap = new Map<string, 'number' | 'operator' | 'equal'>();
+allSignData.forEach(sign => {
+  if (sign.type) {
+    signTypeMap.set(sign.label, sign.type);
+  }
+});
 
 export const getSignsByCategory = (category: string): SignInfo[] => {
   return allSignData.filter(sign => sign.category === category);

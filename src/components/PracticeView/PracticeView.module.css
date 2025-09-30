@@ -50,7 +50,7 @@
   min-height: 24px; /* Evita que el texto salte */
 }
 
-.predictedVowel {
+.predictedSign {
   font-weight: 700;
   color: var(--primary-color);
   padding: 0.2rem 0.5rem;
@@ -68,65 +68,110 @@
 
 .progressBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #ccc 0%, #aaa 100%); /* Color gris por defecto */
+  background: linear-gradient(90deg, #ccc 0%, #aaa 100%);
   border-radius: 10px;
   transition: width 0.3s ease-out, background 0.3s ease;
 }
 
 .progressBarFill.correct {
-  background: linear-gradient(90deg, var(--green-accent) 0%, var(--secondary-color) 100%); /* Color de éxito */
+  background: linear-gradient(90deg, var(--green-accent) 0%, var(--secondary-color) 100%);
 }
 
 .controls {
   display: flex;
   justify-content: center;
-  align-items: center; /* Asegura que los botones estén alineados */
+  align-items: center;
   width: 100%;
+  margin-top: 1rem;
+  min-height: 80px; /* Espacio reservado para los botones */
 }
 
-.controlButton {
+.activeControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.primaryIconButton, .secondaryIconButton {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.primaryIconButton {
+  width: 70px;
+  height: 70px;
   background-color: var(--secondary-color);
   color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.controlButton:hover:not(:disabled) {
+.primaryIconButton:hover:not(:disabled) {
   background-color: var(--primary-color);
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(74, 71, 163, 0.3);
 }
 
-.controlButton:disabled {
+.primaryIconButton:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-  transform: none;
+  box-shadow: none;
 }
 
-.scanButton {
-  background-color: #28a745; /* Verde */
-}
-.scanButton:hover:not(:disabled) {
-  background-color: #218838;
+.secondaryIconButton {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f0f0;
+  color: var(--text-color-light);
+  border: 2px solid var(--border-color);
 }
 
-.stopButton {
+.secondaryIconButton:hover {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.stopState {
   background-color: #ff4d4d;
 }
 
-.stopButton:hover:not(:disabled) {
+.stopState:hover {
   background-color: #cc0000;
 }
 
-.offButton {
-  background-color: #6c757d; /* Gris */
-  margin-left: 1rem; /* Espacio entre los botones */
-}
-.offButton:hover:not(:disabled) {
-  background-color: #5a6268;
+/* Animación para el spinner de carga */
+.spinner {
+  animation: rotate 2s linear infinite;
+  width: 30px;
+  height: 30px;
 }
 
+.spinner .path {
+  stroke: #ffffff;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}

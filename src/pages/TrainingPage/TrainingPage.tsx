@@ -1,17 +1,22 @@
 // src/pages/TrainingPage/TrainingPage.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSignsByCategory } from '../../data/signData';
+import { getSignsByCategory, allSignData } from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
 import { useSpeech } from '../../context/SpeechContext';
 import { speak } from '../../utils/speech';
+import TrainingSummaryCard from '../../components/TrainingSummaryCard/TrainingSummaryCard';
+
+const drawingOptions = {
+  connector: { color: "#00FF00", lineWidth: 2 },
+  landmark: { color: "#FF0000", radius: 2 },
+};
 
 type Landmark = { x: number; y: number; z: number };
+type Frame = Landmark[];
 type TrainingSample = { landmarks: Landmark[]; label: string };
-
 const SAMPLES_PER_BURST = 30;
-const CAPTURE_INTERVAL_MS = 100;
 
 const TrainingPage: React.FC = () => {
   const { category } = useParams<{ category: string }>();
@@ -29,11 +34,26 @@ const TrainingPage: React.FC = () => {
   const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [trainingData, setTrainingData] = useState<TrainingSample[]>([]);
-  const [lastCapturedHand, setLastCapturedHand] = useState<Landmark[] | null>(null);
+  const [lastCapturedHands, setLastCapturedHands] = useState<Frame[] | null>(null);
   
   const [isBursting, setIsBursting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [trainingSummary, setTrainingSummary] = useState<{ [key: string]: number }>({});
+
+  const fetchSummary = useCallback(async () => {
+    try {
+      // Usamos un timestamp para evitar la caché del navegador
+      const response = await fetch(`/training_summary.json?t=${new Date().getTime()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTrainingSummary(data);
+      }
+    } catch (error) {
+      console.log("No se encontró resumen de entrenamiento, se creará uno nuevo.");
+      setTrainingSummary({});
+    }
+  }, []);
 
   useEffect(() => {
     if (category) {
@@ -44,30 +64,31 @@ const TrainingPage: React.FC = () => {
       if (allLabels.length > 0) {
         setSelectedLabel(allLabels[0]);
       }
-      if (isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
+      if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
 
     const createHandLandmarker = async () => {
       const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
       const landmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate: "GPU" },
-        runningMode: "VIDEO", numHands: 1,
+        runningMode: "VIDEO",
+        numHands: 2, // Creamos un motor potente que puede ver hasta 2 manos desde el principio
       });
       setHandLandmarker(landmarker);
+      console.log("HandLandmarker inicializado una sola vez.");
     };
+    
     createHandLandmarker();
     
-    // La función de limpieza se encarga de apagar la cámara al salir de la página
     return () => {
       stopCamera(false);
+      handLandmarker?.close();
     };
-  }, [category, isSpeechEnabled]);
+  }, [category, isSpeechEnabled, fetchSummary]);
 
   const handleGoHome = () => {
     stopCamera(true);
-    setTimeout(() => {
-      navigate('/');
-    }, 700);
+    setTimeout(() => navigate('/'), 700);
   };
 
   const startCamera = async () => {
@@ -78,18 +99,14 @@ const TrainingPage: React.FC = () => {
         setIsCameraOn(true);
         isCameraOnRef.current = true;
         predictWebcam();
-        if (isSpeechEnabled) speak("Cámara encendida.");
+        if(isSpeechEnabled) speak("Cámara encendida.");
       });
     }
   };
 
   const stopCamera = (shouldSpeak: boolean = true) => {
-    if (!isCameraOnRef.current) return; // Si ya está apagada, no hacemos nada
-    
-    if (shouldSpeak && isSpeechEnabled) {
-      speak("Cámara apagada.");
-    }
-    
+    if (!isCameraOnRef.current) return;
+    if (shouldSpeak && isSpeechEnabled) speak("Cámara apagada.");
     isCameraOnRef.current = false;
     setIsCameraOn(false);
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -99,7 +116,7 @@ const TrainingPage: React.FC = () => {
     }
   };
 
-  const predictWebcam = () => {
+  const predictWebcam = useCallback(() => {
     if (!isCameraOnRef.current || !handLandmarker || !videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     if (video.readyState < 2 || video.videoWidth === 0) {
@@ -115,32 +132,40 @@ const TrainingPage: React.FC = () => {
     const results = handLandmarker.detectForVideo(video, performance.now());
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (results.landmarks && results.landmarks.length > 0) {
-      setLastCapturedHand(results.landmarks[0]);
+      setLastCapturedHands(results.landmarks);
       for (const landmarks of results.landmarks) {
-        drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: "#00FF00", lineWidth: 5 });
-        drawingUtils.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
+        drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, drawingOptions.connector);
+        drawingUtils.drawLandmarks(landmarks, drawingOptions.landmark);
       }
     } else {
-      setLastCapturedHand(null);
+      setLastCapturedHands(null);
     }
     if (isCameraOnRef.current) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
     }
-  };
+  }, [handLandmarker]);
+
+  useEffect(() => {
+    if (isCameraOn) {
+        predictWebcam();
+    }
+  }, [isCameraOn, predictWebcam]);
+
 
   const normalizeLandmarks = (landmarks: Landmark[]): Landmark[] => {
+    if (landmarks.length === 0) return [];
     const baseX = landmarks[0].x;
     const baseY = landmarks[0].y;
     return landmarks.map(lm => ({ x: lm.x - baseX, y: lm.y - baseY, z: lm.z }));
   };
 
-  const getSampleCount = (label: string) => {
-    return trainingData.filter(d => d.label === label).length;
-  };
-  
+  const getSampleCount = (label: string) => trainingData.filter(d => d.label === label).length;
+  const handleLabelSelect = (label: string) => { setSelectedLabel(label); if(isSpeechEnabled) speak(`Seleccionado: ${label}`); };
+ 
   const handleCapture = () => {
-    if (lastCapturedHand) {
-      const normalizedLandmarks = normalizeLandmarks(lastCapturedHand);
+    if (lastCapturedHands && lastCapturedHands.length > 0) {
+      const combinedLandmarks = lastCapturedHands.flat();
+      const normalizedLandmarks = normalizeLandmarks(combinedLandmarks);
       const newSample: TrainingSample = { landmarks: normalizedLandmarks, label: selectedLabel };
       setTrainingData(prevData => [...prevData, newSample]);
     }
@@ -148,20 +173,9 @@ const TrainingPage: React.FC = () => {
   
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  const handleLabelSelect = (label: string) => {
-    setSelectedLabel(label);
-    if(isSpeechEnabled) speak(`Seleccionado: ${label}`);
-  };
-
-  const handleClearData = () => {
-    setTrainingData([]);
-    setFeedbackMessage('');
-    if(isSpeechEnabled) speak("Datos de entrenamiento limpiados.");
-  };
-
   const handleBurstCapture = async () => {
-    if (!lastCapturedHand) {
-      setFeedbackMessage('Mano no detectada. Asegúrate de que tu mano esté visible.');
+    if (!lastCapturedHands) {
+      setFeedbackMessage('Mano no detectada.');
       setTimeout(() => setFeedbackMessage(''), 3000);
       return;
     }
@@ -171,7 +185,7 @@ const TrainingPage: React.FC = () => {
       setFeedbackMessage(`Prepárate en ${i}...`);
       await delay(1000);
     }
-    setFeedbackMessage(`¡Capturando ${SAMPLES_PER_BURST} muestras! Mantén la pose...`);
+    setFeedbackMessage(`¡Capturando ${SAMPLES_PER_BURST} muestras!`);
     await new Promise<void>(resolve => {
       let captureCount = 0;
       const intervalId = setInterval(() => {
@@ -181,7 +195,7 @@ const TrainingPage: React.FC = () => {
           clearInterval(intervalId);
           resolve();
         }
-      }, CAPTURE_INTERVAL_MS);
+      }, 100);
     });
     const completionMessage = `Captura de ${selectedLabel} completada.`;
     setFeedbackMessage(completionMessage);
@@ -215,14 +229,31 @@ const TrainingPage: React.FC = () => {
     }
   };
 
+  const handleClearSelectedLabelData = () => {
+    const samplesToKeep = trainingData.filter(sample => sample.label !== selectedLabel);
+    const samplesRemovedCount = trainingData.length - samplesToKeep.length;
+    setTrainingData(samplesToKeep);
+    if (isSpeechEnabled && samplesRemovedCount > 0) {
+      speak(`Se eliminaron ${samplesRemovedCount} muestras para ${selectedLabel}.`);
+    }
+  };
+
+  const handleClearAllData = () => {
+    setTrainingData([]);
+    setFeedbackMessage('');
+    if(isSpeechEnabled) speak("Todos los datos de entrenamiento han sido limpiados.");
+  };
+
+  const sortedSummary = Object.entries(trainingSummary).sort(([,a], [,b]) => b - a);
+
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.trainingPanel}>
         <div className={styles.videoContainer}>
-          <video ref={videoRef} autoPlay playsInline className={styles.video}></video>
-          <canvas ref={canvasRef} className={styles.canvas}></canvas>
-          {feedbackMessage && <div className={styles.feedbackOverlay}>{feedbackMessage}</div>}
-          {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
+            <video ref={videoRef} autoPlay playsInline className={styles.video}></video>
+            <canvas ref={canvasRef} className={styles.canvas}></canvas>
+            {feedbackMessage && <div className={styles.feedbackOverlay}>{feedbackMessage}</div>}
+            {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
         </div>
         <div className={styles.controls}>
           <h1 className={styles.title}>
@@ -235,34 +266,60 @@ const TrainingPage: React.FC = () => {
                 key={label} 
                 onClick={() => handleLabelSelect(label)}
                 className={`${styles.labelButton} ${selectedLabel === label ? styles.selected : ''} ${label === 'Nulo' ? styles.nuloButton : ''}`}
-                disabled={isBursting || isSending}
+                disabled={isBursting || isSending }
               >
                 {label} ({getSampleCount(label)})
               </button>
             ))}
           </div>
+
+          {/* --- SECCIÓN DE ACCIONES REDISEÑADA --- */}
           <div className={styles.actions}>
+            {/* 1. Botones de Iconos para acciones principales */}
+            <div className={styles.iconActions}>
+              <button onClick={!isCameraOn ? startCamera : () => stopCamera(true)} className={styles.iconButton} disabled={isBursting || isSending} title={isCameraOn ? "Apagar Cámara" : "Encender Cámara"}>
+                {isCameraOn ? 
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 16l-4-4m0 0L8 8m4 4l4-4m-4 4l-4 4"></path><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                  : 
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                }
+              </button>
+              <button onClick={handleBurstCapture} className={`${styles.iconButton} ${styles.primary}`} disabled={!isCameraOn || isBursting || isSending} title="Capturar Ráfaga">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              </button>
+              <button onClick={handleSendDataAndTrain} disabled={trainingData.length === 0 || isBursting || isSending} className={styles.iconButton} title="Enviar y Entrenar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2.8-3.3-4.9-6.3-4.9h-1.3c-.3-1.3-1-2.4-2-3.2-1.4-1.1-3.1-1.8-5-1.8-3.4 0-6.2 2.7-6.5 6.1-.3 2.5 1 4.9 2.8 6.4"></path><path d="M16 16v6m-4-3l4 3 4-3"></path></svg>
+              </button>
+            </div>
+            
+            <hr className={styles.divider}/>
+
+            {/* 2. Botones de Texto para acciones secundarias */}
+            <div className={styles.textActions}>
+              <button onClick={handleClearSelectedLabelData} className={styles.textButton} disabled={getSampleCount(selectedLabel) === 0 || isBursting || isSending}>
+                Limpiar {selectedLabel} ({getSampleCount(selectedLabel)})
+              </button>
+              <button onClick={handleClearAllData} className={`${styles.textButton} ${styles.dangerText}`} disabled={trainingData.length === 0 || isBursting || isSending}>
+                Limpiar Todo
+              </button>
+            </div>
+            
             <button onClick={handleGoHome} className={styles.backButton}>
               ← Volver al Inicio
-            </button>
-            <hr className={styles.divider}/>
-            {!isCameraOn ? 
-              <button onClick={startCamera} className={styles.actionButton} disabled={isBursting || isSending}>Encender Cámara</button> :
-              <button onClick={() => stopCamera(true)} className={`${styles.actionButton} ${styles.stopButton}`} disabled={isBursting || isSending}>Apagar Cámara</button>
-            }
-            <button onClick={handleBurstCapture} disabled={!isCameraOn || isBursting || isSending} className={`${styles.actionButton} ${styles.burstButton}`}>
-              Capturar Ráfaga ({SAMPLES_PER_BURST})
-            </button>
-            <button onClick={handleClearData} disabled={trainingData.length === 0 || isBursting || isSending} className={`${styles.actionButton} ${styles.clearButton}`}>
-              Limpiar Datos ({trainingData.length})
-            </button>
-            <hr className={styles.divider}/>
-            <button onClick={handleSendDataAndTrain} disabled={trainingData.length === 0 || isBursting || isSending} className={`${styles.actionButton} ${styles.sendButton}`}>
-              {isSending ? 'Enviando...' : `Enviar y Entrenar (${trainingData.length})`}
             </button>
           </div>
         </div>
       </div>
+      {sortedSummary.length > 0 &&(
+        <div className={styles.sumaryPanel}>
+          <h2 className={styles.sumaryTitle}>Resultados del Entrenamiento</h2>
+          <div className={styles.sumaryGrid}>
+            {sortedSummary.map(([cat, acc])=> (
+              <TrainingSummaryCard key={cat} category={cat} accuracy={acc} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

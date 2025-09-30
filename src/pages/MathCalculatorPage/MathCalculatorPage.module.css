@@ -1,0 +1,135 @@
+/* src/pages/MathCalculatorPage/MathCalculatorPage.module.css */
+.pageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 150px); /* Ajusta según la altura de tu navbar/footer */
+}
+
+.calculatorLayout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.videoContainer {
+  flex: 2;
+  min-width: 500px;
+}
+
+.displayPanel {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.liveDisplay {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  position: relative; /* Para la barra de progreso */
+  overflow: hidden; /* Para la barra de progreso */
+}
+
+.captureProgressBg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.captureProgressFill {
+  height: 100%;
+  background-color: var(--green-accent);
+  transition: width 0.1s linear; /* Transición suave para la barra */
+}
+
+.display {
+  background-color: var(--background-color);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: right;
+  font-family: monospace;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.equation {
+  color: var(--text-color-light);
+  font-size: 1.5rem;
+  min-height: 30px;
+  word-wrap: break-word;
+}
+
+.result {
+  color: var(--primary-color);
+  font-size: 3rem;
+  font-weight: bold;
+  min-height: 50px;
+}
+
+.instructions {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+  line-height: 1.5;
+  background-color: rgba(112, 111, 211, 0.05);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.secondaryActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.clearButton, .backButton {
+  flex: 1;
+  border: none;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  text-decoration: none;
+}
+
+.clearButton {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border: 2px solid var(--danger-border);
+}
+.clearButton:hover {
+  background-color: var(--danger-border);
+  color: white;
+}
+
+.backButton {
+  background-color: #f0f0f0;
+  color: var(--text-color);
+}
+.backButton:hover {
+  background-color: #e0e0e0;
+}
+

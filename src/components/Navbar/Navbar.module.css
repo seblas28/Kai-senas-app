@@ -63,3 +63,38 @@
 .navLinks a:hover::after {
   width: 100%;
 }
+
+/* --- ESTILOS PARA LOS BOTONES DE LOGIN/LOGOUT --- */
+
+.loginLink {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.loginLink:hover {
+  background-color: #f0f0f0;
+  color: var(--primary-color);
+}
+
+.logoutButton {
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border: 2px solid var(--danger-border-light);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background-color: var(--danger-border);
+  color: white;
+  border-color: var(--danger-border);
+}
