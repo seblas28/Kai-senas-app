@@ -1,7 +1,7 @@
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSignsByCategory, allSignData } from '../../data/signData';
+import { getSignsByCategory } from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
 import { useSpeech } from '../../context/SpeechContext';
