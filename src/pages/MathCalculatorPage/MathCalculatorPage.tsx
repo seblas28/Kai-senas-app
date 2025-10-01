@@ -22,6 +22,18 @@ const MathCalculatorPage: React.FC = () => {
   const captureTimer = useRef<number | null>(null);
   const lastSign = useRef<string | null>(null);
 
+  useEffect(() => {
+    if (isSpeechEnabled) {
+      // Usamos setTimeout para asegurar que el componente se ha renderizado 
+      // antes de intentar reproducir el audio.
+      const timer = setTimeout(() => {
+        speak("Bienvenido a la practica de mátematicas. Por favor, enciende tu cámara y comienza con el primer número.");
+      }, 500); // Pequeño retraso para evitar problemas de inicialización
+
+      return () => clearTimeout(timer); // Limpieza si el componente se desmonta
+    }
+  }, [isSpeechEnabled]);
+
   const addSignToEquation = (sign: string) => {
     setEquation(prev => [...prev, sign]);
     if (isSpeechEnabled) speak(sign);

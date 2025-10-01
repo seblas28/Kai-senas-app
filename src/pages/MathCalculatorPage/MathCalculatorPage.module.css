@@ -126,10 +126,10 @@
 }
 
 .backButton {
-  background-color: #f0f0f0;
+  background-color: var(--background-color); /* CAMBIO: Usando variable */
   color: var(--text-color);
+  border: 1px solid var(--border-color); /* CAMBIO: Borde añadido */
 }
 .backButton:hover {
-  background-color: #e0e0e0;
+  background-color: var(--border-color); /* CAMBIO: Usando variable */
 }
-

@@ -18,7 +18,7 @@
 
 .heroSubtitle {
   font-size: 1.2rem;
-  color: #555;
+  color: var(--text-color-light); /* CAMBIO: Usando variable */
   max-width: 700px;
   margin: 0 auto 2rem auto;
   line-height: 1.6;
@@ -26,7 +26,7 @@
 
 .categorySection {
   padding: 3rem 0;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color); /* CAMBIO: Usando variable */
 }
 
 .sectionHeader {
@@ -45,7 +45,7 @@
 }
 
 .trainButton {
-  background-color: #f0f0f0;
+  background-color: var(--background-color); /* CAMBIO: Usando variable */
   color: var(--primary-color);
   border: 2px solid var(--secondary-color);
   padding: 0.75rem 1.5rem;
@@ -72,4 +72,3 @@
   text-decoration: none;
   color: inherit;
 }
-

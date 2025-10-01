@@ -31,7 +31,7 @@
 .progressBarBackground {
   width: 100%;
   height: 10px;
-  background-color: #e9ecef;
+  background-color: var(--border-color); /* CAMBIO: Usando variable */
   border-radius: 5px;
   overflow: hidden;
 }

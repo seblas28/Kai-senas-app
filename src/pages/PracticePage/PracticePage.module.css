@@ -46,7 +46,7 @@
 
 .instructions {
   font-size: 1rem;
-  color: #666;
+  color: var(--text-color-light); /* CAMBIO: Usando variable */
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
@@ -54,10 +54,10 @@
 .referenceContainer {
   width: 100%;
   margin-bottom: 1.5rem;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color); /* CAMBIO: Usando variable */
   border-radius: 12px;
   overflow: hidden;
-  background: #f8f9fa;
+  background: var(--background-color); /* CAMBIO: Usando variable */
 }
 
 .referenceImage {
@@ -70,18 +70,20 @@
   text-align: center;
   margin-top: auto; /* Empuja el botón hacia abajo */
   padding: 0.8rem 1.5rem;
-  background-color: #e9e8f8;
+  background-color: var(--background-color); /* CAMBIO: Usando variable */
   color: var(--primary-color);
-  border: none;
+  border: 1px solid var(--border-color); /* CAMBIO: Borde añadido */
   border-radius: 50px;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease; /* CAMBIO: Transición completa */
   text-transform: capitalize;
 }
 
 .backButton:hover {
-  background-color: #d8d6f3;
+  background-color: var(--secondary-color); /* CAMBIO: Usando variable */
+  color: white;
+  border-color: var(--secondary-color);
 }
 
 .errorContainer {
@@ -91,7 +93,6 @@
 
 .errorText {
   font-size: 1.5rem;
-  color: #555;
+  color: var(--text-color-light); /* CAMBIO: Usando variable */
   margin-bottom: 2rem;
 }
-

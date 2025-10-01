@@ -1,7 +1,7 @@
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSignsByCategory } from '../../data/signData';
+import { getSignsForTraining} from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
 import { useSpeech } from '../../context/SpeechContext';
@@ -57,7 +57,7 @@ const TrainingPage: React.FC = () => {
 
   useEffect(() => {
     if (category) {
-      const signs = getSignsByCategory(category);
+      const signs = getSignsForTraining(category);
       const labels = signs.map(sign => sign.label);
       const allLabels = [...labels, 'Nulo'];
       setCategoryLabels(allLabels);

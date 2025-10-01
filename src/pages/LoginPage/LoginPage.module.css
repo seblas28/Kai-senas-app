@@ -13,7 +13,7 @@
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 450px; /* Un poco más de espacio para la cámara */
   text-align: center;
 }
 
@@ -23,10 +23,73 @@
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-color-light); /* CAMBIO: Usando variable */
   margin-bottom: 2rem;
 }
 
+/* --- Estilos para la cámara --- */
+.mediaContainer {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* Aspect ratio 16:9 */
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--border-color); /* CAMBIO: Usando variable */
+  margin-bottom: 1rem;
+}
+
+.video, .canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(180deg);
+}
+
+.placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-color-light); /* CAMBIO: Usando variable */
+  font-weight: 500;
+  padding: 1rem;
+  text-align: center;
+}
+
+.cameraControls {
+  margin-bottom: 1.5rem;
+}
+
+.cameraButton {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: transparent; /* CAMBIO */
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cameraButton:hover:not(:disabled) {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.cameraButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* --- Resto de los estilos --- */
 .inputGroup {
   text-align: left;
   margin-bottom: 1.5rem;
@@ -42,7 +105,9 @@
 .inputGroup input {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color); /* CAMBIO: Usando variable */
+  background-color: var(--background-color); /* CAMBIO */
+  color: var(--text-color); /* CAMBIO */
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -54,8 +119,54 @@
   box-shadow: 0 0 0 3px rgba(112, 111, 211, 0.2);
 }
 
+.facialActions {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.facialButton {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--secondary-color);
+  background-color: transparent;
+  color: var(--secondary-color);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.facialButton:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.facialButton.registerButton {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.facialButton.registerButton:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.separator {
+  margin: 1.5rem 0;
+  color: var(--text-color-light); /* CAMBIO */
+  font-size: 0.9rem;
+}
+
+
 .error {
-  color: #ff4d4d;
+  color: var(--danger-text); /* CAMBIO: Usando variable */
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.info {
+  color: var(--secondary-color);
   margin-bottom: 1rem;
   font-weight: 500;
 }

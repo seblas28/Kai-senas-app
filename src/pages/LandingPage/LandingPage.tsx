@@ -5,17 +5,25 @@ import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { categoryData } from '../../data/signData';
 import { speak } from '../../utils/speech';
 import { useAuth } from '../../context/AuthContext';
+import { useSpeech } from '../../context/SpeechContext';
 
 const LandingPage: React.FC = () => {
   const { user } = useAuth();
+  const { isSpeechEnabled } = useSpeech();
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
-    const welcomeTimeout = setTimeout(() => {
-      speak("Bienvenido a KaiSeñas");
-    }, 500);
-    return () => clearTimeout(welcomeTimeout);
-  }, []);
+    const hasWelcomed = sessionStorage.getItem('hasWelcomed');
+
+    if (isSpeechEnabled && !hasWelcomed) {
+      const welcomeTimeout = setTimeout(() => {
+        speak("Bienvenido a KaiSeñas");
+        sessionStorage.setItem('hasWelcomed', 'true');
+      }, 500);
+      return () => clearTimeout(welcomeTimeout);
+    }
+  }, [isSpeechEnabled]);
+
   return (
     <div className={styles.pageContainer}>
       <section className={styles.hero}>

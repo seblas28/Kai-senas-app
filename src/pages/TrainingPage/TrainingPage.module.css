@@ -1,7 +1,8 @@
-
 /* src/pages/TrainingPage/TrainingPage.module.css */
 .pageWrapper {
   display: flex;
+  flex-direction: column; /* CAMBIO: Para apilar el panel y el resumen */
+  gap: 2rem; /* Espacio entre el panel y el resumen */
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 150px);
@@ -22,16 +23,17 @@
   position: relative;
   min-width: 500px;
   padding-top: 45%;
-  background: #2c2c2c;
+  background: var(--background-color); /* CAMBIO */
+  border: 1px solid var(--border-color); /* CAMBIO */
   border-radius: 12px;
   overflow: hidden;
-  display: flex; 
-  justify-content: center; 
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
-.placeholder { 
-  color: #a0a0a0; 
-  font-weight: 500; 
+.placeholder {
+  color: var(--text-color-light); /* CAMBIO */
+  font-weight: 500;
 }
 .video, .canvas {
   position: absolute;
@@ -93,7 +95,7 @@
 
 .iconActions {
   display: flex;
-  justify-content: space-around; /* Distribuye los íconos uniformemente */
+  justify-content: space-around;
   align-items: center;
 }
 
@@ -116,10 +118,8 @@
   transform: translateY(-2px);
 }
 .iconButton:disabled {
-  background-color: #f0f0f0;
-  color: #ccc;
+  opacity: 0.5; /* CAMBIO */
   cursor: not-allowed;
-  border-color: #e0e0e0;
 }
 .iconButton.primary {
   width: 70px;
@@ -140,8 +140,8 @@
 
 .textButton {
   flex: 1;
-  background-color: #f0f0f0;
-  border: none;
+  background-color: transparent; /* CAMBIO */
+  border: 1px solid var(--border-color); /* CAMBIO */
   color: var(--text-color-light);
   padding: 0.75rem;
   font-weight: 600;
@@ -150,19 +150,20 @@
   transition: all 0.3s ease;
 }
 .textButton:hover:not(:disabled) {
-  background-color: #e0e0e0;
+  background-color: var(--border-color); /* CAMBIO */
   color: var(--text-color);
 }
 .textButton.dangerText {
   color: var(--danger-text);
+  border-color: var(--danger-border-light); /* CAMBIO */
 }
 .textButton.dangerText:hover:not(:disabled) {
   background-color: var(--danger-bg);
   color: var(--danger-text);
+  border-color: var(--danger-border); /* CAMBIO */
 }
 .textButton:disabled {
-  background-color: #f8f8f8;
-  color: #ccc;
+  opacity: 0.5; /* CAMBIO */
   cursor: not-allowed;
 }
 
@@ -207,15 +208,16 @@
   border-radius: 12px;
 }
 
-.summaryPanel {
-  margin-top: 2rem;
+.summaryPanel { /* CAMBIO: Nombre original era sumaryPanel */
+  width: 100%;
+  max-width: 1200px;
   padding: 2rem;
   background-color: var(--card-bg);
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.1);
 }
 
-.summaryTitle {
+.summaryTitle { /* CAMBIO: Nombre original era sumaryTitle */
   font-size: 2rem;
   color: var(--primary-color);
   margin-top: 0;
@@ -223,7 +225,7 @@
   text-align: center;
 }
 
-.summaryGrid {
+.summaryGrid { /* CAMBIO: Nombre original era sumaryGrid */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
