@@ -32,7 +32,7 @@ const LoginPage: React.FC = () => {
   const { isSpeechEnabled } = useSpeech();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingMessage, setLoadingMessage] = useState('Cargando modelos de IA...');
+  const [loadingMessage] = useState('Cargando modelos de IA...');
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
