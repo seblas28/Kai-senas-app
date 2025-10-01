@@ -43,6 +43,7 @@ const LandingPage: React.FC = () => {
               practiceLink={category.id === 'matematicas' ? '/practice/matematicas' : `/practice/${category.id}`}
               trainLink={`/training/${category.id}`}
               isAdmin={isAdmin}
+              tag={category.tag}
             />
           ))}
         </div>

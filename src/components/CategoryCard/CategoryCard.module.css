@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+  width: 100%;
+  height: 100%;
 }
 
 .card:hover {
@@ -20,17 +22,38 @@
   object-fit: cover;
 }
 
+.titleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 1.5rem 1rem 1.5rem;
+  min-height: 50px;
+}
+
 .cardTitle {
   font-size: 1.8rem;
   color: var(--primary-color);
-  margin: 1.5rem 1.5rem 1rem 1.5rem;
+  margin: 0;
 }
+
+.tag {
+  background-color: rgba(112, 111, 211, 0.15);
+  color: var(--secondary-color);
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  align-self: center;
+}
+
 
 .buttons {
   display: flex;
   gap: 1rem;
   padding: 0 1.5rem 1.5rem 1.5rem;
-  margin-top: auto; /* Empuja los botones hacia abajo */
+  margin-top: auto; 
 }
 
 .button, .buttonSecondary {
@@ -62,3 +85,4 @@
   background-color: var(--secondary-color);
   color: white;
 }
+

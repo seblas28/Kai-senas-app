@@ -18,15 +18,15 @@
 
 .heroSubtitle {
   font-size: 1.2rem;
-  color: var(--text-color-light); /* CAMBIO: Usando variable */
+  color: var(--text-color-light);
   max-width: 700px;
   margin: 0 auto 2rem auto;
   line-height: 1.6;
 }
 
-.categorySection {
+.coursesSection {
   padding: 3rem 0;
-  border-top: 1px solid var(--border-color); /* CAMBIO: Usando variable */
+  border-top: 1px solid var(--border-color);
 }
 
 .sectionHeader {
@@ -45,7 +45,7 @@
 }
 
 .trainButton {
-  background-color: var(--background-color); /* CAMBIO: Usando variable */
+  background-color: var(--background-color);
   color: var(--primary-color);
   border: 2px solid var(--secondary-color);
   padding: 0.75rem 1.5rem;
@@ -66,9 +66,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 2rem;
+  grid-auto-rows: 1fr;
 }
 
 .cardLink {
   text-decoration: none;
   color: inherit;
+  display: flex;
 }
