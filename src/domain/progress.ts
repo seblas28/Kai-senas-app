@@ -28,7 +28,7 @@ export function recordAttempt(snapshot: ProgressSnapshot, category: string, labe
   const key = progressKey(category, label);
   const previous = snapshot.signs[key] || { bestScore: 0, sessions: 0, totalTime: 0 };
   return { version: 2, signs: { ...snapshot.signs, [key]: {
-    bestScore: completed && !previous.completed ? value : Math.max(previous.bestScore, value), completed: previous.completed === true || completed, sessions: previous.sessions + 1, totalTime: previous.totalTime + Math.round(seconds)
+    bestScore: completed ? (previous.completed ? Math.max(previous.bestScore, value) : value) : (previous.completed ? previous.bestScore : Math.max(previous.bestScore, value)), completed: previous.completed === true || completed, sessions: previous.sessions + 1, totalTime: previous.totalTime + Math.round(seconds)
   } }, recentSessions: [{ category, label, score: value, completed, timestamp }, ...snapshot.recentSessions].slice(0, 20) };
 }
 export function categoryAverage(snapshot: ProgressSnapshot, category: string, labels: readonly string[]): number {

@@ -1,33 +1,31 @@
 // src/pages/CategoryPracticePage/CategoryPracticePage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styles from './CategoryPracticePage.module.css';
 import { getSignsByCategory } from '../../data/signData';
 import PracticeCard from '../../components/PracticeCard/PracticeCard';
 import { speak } from '../../utils/speech';
-import { readProgress, progressKey } from '../../domain/progress';
-import { isModuleId, moduleStates, practiceBlock } from '../../domain/modules';
-import { useAuth } from '../../context/AuthContext';
+import { progressKey } from '../../domain/progress';
+import { isModuleId, practiceBlock } from '../../domain/modules';
+import { useCatalog } from '../../context/CatalogContext';
+import { useProgress } from '../../context/ProgressContext';
 import { useSpeech } from '../../context/SpeechContext';
 
 
-interface SignProgress { bestScore: number; completed?: boolean }
 
 const CategoryPracticePage: React.FC = () => {
-  const { user } = useAuth();
+  const { states: moduleStates } = useCatalog();
+  const { snapshot } = useProgress();
+  const progressData = snapshot.signs;
   const { isSpeechEnabled } = useSpeech();
   const { category } = useParams<{ category: string }>();
-  const [progressData, setProgressData] = useState<{ [key: string]: SignProgress }>({});
 
   useEffect(() => {
-    // Cargamos los datos de progreso del localStorage cuando la página se monta
-    const loadedProgress = readProgress(user?.id).signs;
-    setProgressData(loadedProgress);
 
     if (category && isSpeechEnabled){
       speak(`Practicar ${category}`);
     }
-  }, [category, user?.id, isSpeechEnabled]); // El array vacío asegura que esto solo se ejecute una vez
+  }, [category, isSpeechEnabled]); // El array vacío asegura que esto solo se ejecute una vez
   
   if (!category) {
     return <div>Categoría no encontrada.</div>;

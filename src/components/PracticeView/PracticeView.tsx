@@ -7,7 +7,7 @@ import styles from "./PracticeView.module.css";
 import { speak } from '../../utils/speech';
 import { useSpeech } from "../../context/SpeechContext";
 import { allSignData } from "../../data/signData";
-import { saveAttempt } from '../../domain/progress';
+import { useProgress } from '../../context/ProgressContext';
 import { useAuth } from '../../context/AuthContext';
 import { emptyValidation, validateSign, VALIDATION_HOLD_MS, VALIDATION_CONFIDENCE, VALIDATION_MAX_GAP_MS, type SignPrediction } from '../../domain/signValidation';
 
@@ -29,6 +29,7 @@ const drawingOptions = {
 
 const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onPrediction }) => {
   const { user } = useAuth();
+  const { save: persistAttempt } = useProgress();
   const componentActive = useRef(true);
   const streamRef = useRef<MediaStream | null>(null);
   const savedSessionRef = useRef(false);
@@ -201,7 +202,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   const saveProgress = (currentScore: number, practiceTime: number, completed: boolean) => {
     if (!sign || !category || savedSessionRef.current) return;
     savedSessionRef.current = true;
-    if (!saveAttempt(category, sign, currentScore, practiceTime, user?.id, completed)) setSaveError('No se pudo guardar la sesión en este navegador.');
+    void persistAttempt({ category, label: sign, score: currentScore, seconds: practiceTime, completed }).catch(() => { if (componentActive.current) setSaveError('La sesión no se ha sincronizado. Revisa Mi Progreso para reintentarlo.'); });
   };
 
   const processPracticePrediction = (prediction: SignPrediction | null, now: number, frame: number) => {

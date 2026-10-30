@@ -1,5 +1,7 @@
 // src/components/Navbar/Navbar.tsx
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { canManage } from '../../domain/modules';
 import { Link } from 'react-router-dom';
 
 import styles from './Navbar.module.css';
@@ -7,6 +9,7 @@ import SpeechToggleButton from '../SpeechToggleButton/SpeechToggleButton';
 import ThemeToggleButton from '../ThemeToggleButton/ThemeToggleButton';
 
 const Navbar: React.FC = () => {
+  const { user, roleLoading } = useAuth();
 
 
   return (
@@ -18,7 +21,8 @@ const Navbar: React.FC = () => {
             <li><Link to="/">Inicio</Link></li>
             <li><Link to="/progreso">Mi Progreso</Link></li>
             <li><Link to="/ranking">Competición</Link></li>
-            {import.meta.env.DEV && <li><Link to="/training/vocales">Laboratorio local</Link></li>} 
+            {!roleLoading && canManage(user?.role) && <li><Link to="/training/vocales">Capturar muestras</Link></li>} 
+          {!roleLoading && canManage(user?.role) && <li><Link to="/administracion">Administración</Link></li>}
           </ul>
           <SpeechToggleButton />
           <ThemeToggleButton />

@@ -2,6 +2,10 @@
 import React from 'react';
 import ModuleGate from './components/ModuleGate';
 import RankingPage from './pages/RankingPage';
+import MaintenancePage from './pages/MaintenancePage';
+import { useAuth } from './context/AuthContext';
+import { CatalogProvider } from './context/CatalogContext';
+import { ProgressProvider } from './context/ProgressContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SpeechProvider } from './context/SpeechContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,12 +20,19 @@ import TrainingPage from './pages/TrainingPage/TrainingPage';
 import CategoryPracticePage from './pages/CategoryPracticePage/CategoryPracticePage'; // Nueva página
 import MathCalculatorPage from './pages/MathCalculatorPage/MathCalculatorPage';
 
+function DataProviders({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <section className="kai-notice" role="status">Recuperando sesión…</section>;
+  return <CatalogProvider key={user?.id || 'guest'}><ProgressProvider key={user?.id || 'guest'}>{children}</ProgressProvider></CatalogProvider>;
+}
+
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <SpeechProvider>
         <Router>
           <AuthProvider>
+          <DataProviders>
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -32,12 +43,14 @@ const App: React.FC = () => {
                   <Route path="/practice/:category/:sign" element={<ModuleGate><PracticePage /></ModuleGate>} />
                   <Route path="/progreso" element={<ProgressPage />} />
                   <Route path="/training/:category" element={<ModuleGate training><TrainingPage /></ModuleGate>} /> 
+                  <Route path="/administracion" element={<MaintenancePage />} />
                   <Route path="/ranking" element={<RankingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                 </Routes>
               </main>
               <Footer />
             </div>
+          </DataProviders>
           </AuthProvider>
         </Router>
       </SpeechProvider>

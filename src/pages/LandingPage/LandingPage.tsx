@@ -5,11 +5,13 @@ import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { categoryData } from '../../data/signData';
 import { speak } from '../../utils/speech';
 import { useAuth } from '../../context/AuthContext';
-import { canManage, moduleStates, practiceBlock } from '../../domain/modules';
+import { canManage, practiceBlock } from '../../domain/modules';
+import { useCatalog } from '../../context/CatalogContext';
 import { useSpeech } from '../../context/SpeechContext';
 
 const LandingPage: React.FC = () => {
   const { user } = useAuth();
+  const { states: moduleStates, loading, error, refresh } = useCatalog();
   const { isSpeechEnabled } = useSpeech();
   const isAdmin = canManage(user?.role);
 
@@ -36,7 +38,9 @@ const LandingPage: React.FC = () => {
 
       <section id="cursos" className={styles.coursesSection}>
         <div className={styles.cardGrid}>
-          {categoryData.filter(category => moduleStates[category.id].visibility === 'visible').map((category) => (
+          {loading && <p role="status">Cargando cursos…</p>}
+          {error && <p role="alert">{error} <button onClick={() => void refresh()}>Reintentar</button></p>}
+          {categoryData.filter(() => !loading && !error).filter(category => moduleStates[category.id].visibility === 'visible').map((category) => (
             <CategoryCard
               key={category.id}
               title={category.title}
