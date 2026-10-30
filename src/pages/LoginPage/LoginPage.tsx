@@ -17,6 +17,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+console.log("Firebase Config Cargada:", firebaseConfig);
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -169,9 +171,13 @@ const LoginPage: React.FC = () => {
     setInfo("Verificando rostro con Firebase...");
     try {
         const userDocRef = doc(db, "usuarios", username.toLowerCase());
+        console.log(`[PRUEBA] Intentando leer el documento: /usuarios/${username.toLowerCase()}`);
         const docSnap = await getDoc(userDocRef);
+        console.log("[PRUEBA] Lectura de documento completada.");
 
         if (docSnap.exists()) {
+
+          console.log("[PRUEBA] Documento encontrado. Datos recibidos:", docSnap.data());  
             const storedFaceData = JSON.parse(docSnap.data().rostro_data);
             
             const currentFaceData = lastCapturedFace.current;
@@ -184,21 +190,23 @@ const LoginPage: React.FC = () => {
                 totalDistance += Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2));
             }
             const averageDistance = totalDistance / pointsCount;
-            const threshold = 0.01;
+            const threshold = 0.035;
 
             if (averageDistance < threshold) {
                 if (isSpeechEnabled) speak(`Bienvenido, ${username}`);
                 login(username, 'facial_login_placeholder');
             } else {
-                setError("Reconocimiento facial fallido. Inténtalo de nuevo.");
+                const distanceInfo = `(Distancia: ${averageDistance.toFixed(4)})`;
+                setError(`Reconocimiento fallido. Intenta mirar de frente y con buena luz. ${distanceInfo}`);
                 if (isSpeechEnabled) speak("Rostro no reconocido");
             }
         } else {
+            console.log("[PRUEBA] El documento NO existe en la base de datos.");
             setError("Usuario no encontrado o sin registro facial.");
         }
     } catch (err) {
-        console.error(err);
-        setError("Error al conectar con el servidor de autenticación.");
+        console.error("Error detallado de Firebase:", err);
+        setError("Error de conexión. Revisa la consola para más detalles.");
     }
   };
 

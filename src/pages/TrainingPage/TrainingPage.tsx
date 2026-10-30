@@ -42,17 +42,26 @@ const TrainingPage: React.FC = () => {
   const [trainingSummary, setTrainingSummary] = useState<{ [key: string]: number }>({});
 
   const fetchSummary = useCallback(async () => {
+    // --- INICIO DE DIAGNÓSTICO ---
+    console.log("[DIAGNÓSTICO] Iniciando la carga de 'training_summary.json'...");
     try {
-      // Usamos un timestamp para evitar la caché del navegador
       const response = await fetch(`/training_summary.json?t=${new Date().getTime()}`);
+      
+      console.log("[DIAGNÓSTICO] Respuesta del servidor:", response);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("[DIAGNÓSTICO] Datos JSON cargados con éxito:", data);
         setTrainingSummary(data);
+      } else {
+        console.error(`[DIAGNÓSTICO] Fallo al cargar el archivo. Estado: ${response.status} (${response.statusText})`);
+        setTrainingSummary({});
       }
     } catch (error) {
-      console.log("No se encontró resumen de entrenamiento, se creará uno nuevo.");
+      console.error("[DIAGNÓSTICO] Error de red o JSON inválido:", error);
       setTrainingSummary({});
     }
+    // --- FIN DE DIAGNÓSTICO ---
   }, []);
 
   useEffect(() => {
@@ -79,6 +88,7 @@ const TrainingPage: React.FC = () => {
     };
     
     createHandLandmarker();
+    fetchSummary();
     
     return () => {
       stopCamera(false);
@@ -218,8 +228,13 @@ const TrainingPage: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
-      setFeedbackMessage('¡Datos enviados! Revisa la terminal del servidor.');
-      if(isSpeechEnabled) speak("Datos enviados con éxito.");
+      setFeedbackMessage('¡Entrenamiento completado! Actualizando resultados...');
+      if(isSpeechEnabled) speak("Entrenamiento completado. Actualizando resultados.");
+
+      await delay(2000);
+      await fetchSummary();
+      setFeedbackMessage('');
+
     } catch (error) {
       console.error('Error al enviar datos:', error);
       setFeedbackMessage('Error al conectar con el servidor. ¿Está en ejecución?');
@@ -311,9 +326,9 @@ const TrainingPage: React.FC = () => {
         </div>
       </div>
       {sortedSummary.length > 0 &&(
-        <div className={styles.sumaryPanel}>
-          <h2 className={styles.sumaryTitle}>Resultados del Entrenamiento</h2>
-          <div className={styles.sumaryGrid}>
+        <div className={styles.summaryPanel}>
+          <h2 className={styles.summaryTitle}>Resultados del Entrenamiento</h2>
+          <div className={styles.summaryGrid}>
             {sortedSummary.map(([cat, acc])=> (
               <TrainingSummaryCard key={cat} category={cat} accuracy={acc} />
             ))}
