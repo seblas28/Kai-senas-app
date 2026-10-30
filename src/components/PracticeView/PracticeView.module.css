@@ -70,7 +70,7 @@
   height: 100%;
   background: linear-gradient(90deg, #ccc 0%, #aaa 100%);
   border-radius: 10px;
-  transition: width 0.3s ease-out, background 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 .progressBarFill.correct {
@@ -175,3 +175,5 @@
     stroke-dashoffset: -124;
   }
 }
+.validationStatus { min-height: 3rem; margin: 0.75rem 0; font-weight: 600; color: var(--text-color); }
+.validationHint { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-color-light); line-height: 1.5; }

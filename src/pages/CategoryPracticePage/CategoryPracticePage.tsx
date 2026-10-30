@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useSpeech } from '../../context/SpeechContext';
 
 
-interface SignProgress {  bestScore: number;}
+interface SignProgress { bestScore: number; completed?: boolean }
 
 const CategoryPracticePage: React.FC = () => {
   const { user } = useAuth();
@@ -45,7 +45,7 @@ const CategoryPracticePage: React.FC = () => {
       <div className={styles.cardGrid}>
         {signs.filter(sign => !isModuleId(category) || moduleStates[category].exercises?.[sign.label]?.visibility !== 'hidden').map((sign) => {
           // Para cada seña, verificamos si está completada
-          const isCompleted = (progressData[progressKey(category, sign.label)]?.bestScore || 0) >= 97;
+          const isCompleted = progressData[progressKey(category, sign.label)]?.completed === true;
 
           const blocked = isModuleId(category) ? practiceBlock(moduleStates[category], sign.label) : 'Curso no disponible';
           if (blocked) return <div key={sign.label} className={styles.cardLink} aria-disabled="true"><PracticeCard label={sign.label} imageSrc={sign.imageSrc} description={blocked} isCompleted={false} /></div>;

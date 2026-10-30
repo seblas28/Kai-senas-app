@@ -25,7 +25,7 @@ test('la misma etiqueta en dos categorías conserva resultados independientes', 
   assert.notEqual(progress.storageKey('one'), progress.storageKey());
 });
 test('el promedio incluye señas pendientes y da igual peso a las categorías', () => {
-  const snapshot = progress.recordAttempt(progress.emptyProgress(), 'vocales', 'A', 100, 1);
+  const snapshot = progress.recordAttempt(progress.emptyProgress(), 'vocales', 'A', 100, 1, 100, true);
   assert.equal(progress.categoryAverage(snapshot, 'vocales', ['A', 'E', 'I', 'O', 'U']), 20);
   assert.equal(progress.globalAverage([90, 75, 81]), 82);
   assert.equal(progress.globalAverage([]), 0);

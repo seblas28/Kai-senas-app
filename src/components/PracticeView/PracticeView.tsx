@@ -9,6 +9,7 @@ import { useSpeech } from "../../context/SpeechContext";
 import { allSignData } from "../../data/signData";
 import { saveAttempt } from '../../domain/progress';
 import { useAuth } from '../../context/AuthContext';
+import { emptyValidation, validateSign, VALIDATION_HOLD_MS, VALIDATION_CONFIDENCE, VALIDATION_MAX_GAP_MS, type SignPrediction } from '../../domain/signValidation';
 
 interface PracticeViewProps {
   category?: 'vocales' | 'numeros' | 'matematicas';
@@ -37,7 +38,10 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   const isScanningRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(0);
   const animationFrameId = useRef<number | null>(null);
-  const bestSessionScoreRef = useRef<number>(0);
+  const validationRef = useRef(emptyValidation());
+  const scanActiveRef = useRef(false);
+  const lastVideoTimeRef = useRef(-1);
+  const [holdProgress, setHoldProgress] = useState(0);
   const lastCapturedHands = useRef<Frame[] | null>(null);
   const debounceTimeout = useRef<number | null>(null);
 
@@ -66,6 +70,13 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     componentActive.current = true;
     setIsCameraOn(false);
     setIsScanning(false);
+    scanActiveRef.current = false;
+    validationRef.current = emptyValidation();
+    lastVideoTimeRef.current = -1;
+    setHoldProgress(0);
+    setIsTaskCompleted(false);
+    setPredictedSign('...');
+    setConfidence(0);
     setLabels([]);
     let cancelled = false;
     let ownedLandmarker: HandLandmarker | null = null;
@@ -118,6 +129,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       cancelled = true;
       componentActive.current = false;
       isScanningRef.current = false;
+      scanActiveRef.current = false;
+      validationRef.current = emptyValidation();
       if (animationFrameId.current !== null) cancelAnimationFrame(animationFrameId.current);
       if (debounceTimeout.current !== null) clearTimeout(debounceTimeout.current);
       streamRef.current?.getTracks().forEach(track => track.stop());
@@ -132,6 +145,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (!componentActive.current || !videoRef.current) { stream.getTracks().forEach(track => track.stop()); return; }
+      lastVideoTimeRef.current = -1;
       streamRef.current = stream;
       videoRef.current.srcObject = stream;
       videoRef.current.addEventListener("loadeddata", () => {
@@ -145,7 +159,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   };
 
   const stopCamera = () => {
-    if (isScanning) stopScan();
+    if (scanActiveRef.current) stopScan();
     isScanningRef.current = false;
     if (videoRef.current?.srcObject) {
       (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
@@ -160,25 +174,64 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     setSaveError(null);
     setIsTaskCompleted(false);
     setIsScanning(true);
-    bestSessionScoreRef.current = 0;
+    scanActiveRef.current = true;
+    validationRef.current = emptyValidation();
+    setHoldProgress(0);
+    setPredictedSign('...');
+    setConfidence(0);
     sessionStartTimeRef.current = Date.now();
     if(isSpeechEnabled) speak("Iniciando escaneo.");
   };
 
   const stopScan = () => {
+    if (!scanActiveRef.current) return;
+    scanActiveRef.current = false;
     setIsScanning(false);
-    if (!onPrediction && !isTaskCompleted) {
+    if (!onPrediction && !validationRef.current.completed) {
       const sessionTime = (Date.now() - sessionStartTimeRef.current) / 1000;
-      saveProgress(bestSessionScoreRef.current, sessionTime);
+      saveProgress(0, sessionTime, false);
+      validationRef.current = emptyValidation();
+      setHoldProgress(0);
+      setPredictedSign('...');
+      setConfidence(0);
     }
-    if(isSpeechEnabled) speak("Escaneo detenido");
+    if (isSpeechEnabled) speak('Escaneo detenido');
   };
 
-  const saveProgress = (currentScore: number, practiceTime: number) => {
+  const saveProgress = (currentScore: number, practiceTime: number, completed: boolean) => {
     if (!sign || !category || savedSessionRef.current) return;
     savedSessionRef.current = true;
-    if (!saveAttempt(category, sign, currentScore, practiceTime, user?.id)) setSaveError('No se pudo guardar la sesión en este navegador.');
+    if (!saveAttempt(category, sign, currentScore, practiceTime, user?.id, completed)) setSaveError('No se pudo guardar la sesión en este navegador.');
   };
+
+  const processPracticePrediction = (prediction: SignPrediction | null, now: number, frame: number) => {
+    if (!scanActiveRef.current || document.hidden) return;
+    setPredictedSign(prediction?.sign || '...');
+    setConfidence((prediction?.confidence || 0) * 100);
+    const next = validateSign(validationRef.current, sign, prediction, now, frame);
+    validationRef.current = next;
+    setHoldProgress(next.progress);
+    if (next.completed) {
+      // La referencia detiene el intento antes de que React actualice el estado.
+      scanActiveRef.current = false;
+      setIsScanning(false);
+      setIsTaskCompleted(true);
+      saveProgress(next.score, (Date.now() - sessionStartTimeRef.current) / 1000, true);
+      if (isSpeechEnabled) speak('¡Muy bien! Has validado ' + sign);
+    }
+  };
+
+  useEffect(() => {
+    const resetOnHide = () => {
+      if (!document.hidden || !scanActiveRef.current) return;
+      validationRef.current = emptyValidation();
+      setHoldProgress(0);
+      setPredictedSign('...');
+      setConfidence(0);
+    };
+    document.addEventListener('visibilitychange', resetOnHide);
+    return () => document.removeEventListener('visibilitychange', resetOnHide);
+  }, []);
 
   const predictWebcam = useCallback(() => {
     if (!isScanningRef.current || !handLandmarker || !videoRef.current || !canvasRef.current) return;
@@ -194,7 +247,14 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       const drawingUtils = new DrawingUtils(ctx);
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      const results = handLandmarker.detectForVideo(video, performance.now());
+      const now = performance.now();
+      if (video.currentTime === lastVideoTimeRef.current) {
+        if (!onPrediction && validationRef.current.lastTimestamp !== null && now - validationRef.current.lastTimestamp > VALIDATION_MAX_GAP_MS) processPracticePrediction(null, now, video.currentTime);
+        if (isScanningRef.current) animationFrameId.current = requestAnimationFrame(predictWebcam);
+        return;
+      }
+      lastVideoTimeRef.current = video.currentTime;
+      const results = handLandmarker.detectForVideo(video, now);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (results.landmarks && results.landmarks.length > 0) {
@@ -212,22 +272,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
               }, 1500);
             }
           }
-        } else if (isScanning) {
-          // MODO PRÁCTICA NORMAL (solo si está escaneando)
-          if (prediction) {
-            const currentConfidence = prediction.confidence * 100;
-            setPredictedSign(prediction.sign);
-            setConfidence(currentConfidence);
-            if (!isTaskCompleted && prediction.sign === sign && currentConfidence >= 97) {
-              setIsTaskCompleted(true);
-              if(isSpeechEnabled) speak(`¡Muy bien! Has completado ${sign}`);
-              const sessionTime = (Date.now() - sessionStartTimeRef.current) / 1000;
-              saveProgress(currentConfidence, sessionTime);
-            }
-            if (prediction.sign === sign && currentConfidence > bestSessionScoreRef.current){
-               bestSessionScoreRef.current = currentConfidence;
-            }
-          }
+        } else {
+          processPracticePrediction(prediction, now, video.currentTime);
         }
         for (const landmarks of results.landmarks) {
           drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, drawingOptions.connector);
@@ -235,6 +281,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
         }
       } else {
         lastCapturedHands.current = null;
+        if (!onPrediction) processPracticePrediction(null, now, video.currentTime);
       }
     } catch (error) {
       console.error("¡ERROR ATRAPADO EN EL BUCLE DE ANIMACIÓN!", error);
@@ -243,7 +290,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     if (isScanningRef.current) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
     }
-  }, [handLandmarker, labels, sign, isSpeechEnabled, onPrediction, iaModel, isScanning]);
+  }, [handLandmarker, labels, sign, isSpeechEnabled, onPrediction, iaModel, category, user?.id]);
   
   useEffect(() => {
     isScanningRef.current = isCameraOn; // El bucle ahora depende solo de si la cámara está encendida
@@ -308,7 +355,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
                   <button onClick={stopScan} className={`${styles.primaryIconButton} ${styles.stopState}`} title="Detener Escaneo">
                       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
                   </button> :
-                  <button onClick={startScan} className={styles.primaryIconButton} title="Iniciar Escaneo">
+                  <button onClick={startScan} className={styles.primaryIconButton} title={isTaskCompleted ? "Practicar de nuevo" : "Iniciar Escaneo"} aria-label={isTaskCompleted ? "Practicar de nuevo" : "Iniciar Escaneo"}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                   </button>
                }
@@ -328,12 +375,13 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
               </>
             ) : ( "Realiza la seña..." )}
           </p>
-          <div className={styles.progressBarBackground}>
-            <div 
-              className={`${styles.progressBarFill} ${predictedSign === sign && confidence > CONFIDENCE_THRESHOLD ? styles.correct : ''}`}
-              style={{ width: `${predictedSign === 'Nulo' ? 0 : confidence}%` }}
-            ></div>
+          <p className={styles.validationStatus} role="status">
+            {isTaskCompleted ? 'Seña validada. Puedes practicar de nuevo.' : !isScanning ? 'Inicia el escaneo para validar la seña.' : predictedSign === '...' || predictedSign === 'Nulo' ? 'Coloca la mano frente a la cámara.' : predictedSign !== sign ? 'Se detectó ' + predictedSign + '. Realiza la seña de ' + sign + '.' : confidence < VALIDATION_CONFIDENCE * 100 ? 'La detección aún no es suficiente. Ajusta la postura.' : 'Mantén ' + sign + ' durante ' + (VALIDATION_HOLD_MS / 1000).toLocaleString('es') + ' segundos sin interrupción.'}
+          </p>
+          <div className={styles.progressBarBackground} role="progressbar" aria-label="Validación sostenida de la seña" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(holdProgress)}>
+            <div className={styles.progressBarFill + (holdProgress > 0 ? ' ' + styles.correct : '')} style={{ width: holdProgress + '%' }} />
           </div>
+          <p className={styles.validationHint}>La barra muestra el tiempo de validación. La confianza indica la seguridad del modelo, no un porcentaje de ejecución correcta.</p>
         </div>
       )}
     </div>

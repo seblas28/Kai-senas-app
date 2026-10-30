@@ -37,7 +37,7 @@ const ProgressPage: React.FC = () => {
     categoryData.forEach(category => {
       const signsInCategory = getSignsByCategory(category.id);
       const completedCount = signsInCategory.filter(
-        sign => (progressData[progressKey(category.id, sign.label)]?.bestScore || 0) >= 97
+        sign => progressData[progressKey(category.id, sign.label)]?.completed === true
       ).length;
       newStats[category.id] = { completed: completedCount, total: signsInCategory.length };
     });
@@ -92,7 +92,7 @@ const ProgressPage: React.FC = () => {
     <div className={styles.pageWrapper}>
       <h1 className={styles.title}>Mi Progreso</h1>
       <p className={styles.subtitle}>
-        Progreso personal guardado en este navegador. El promedio da el mismo peso a vocales, abecedario y números; las señas aún no practicadas cuentan como cero. Matemáticas queda fuera durante alpha y beta. Estos valores no son resultados competitivos.
+        Progreso personal guardado en este navegador. El promedio da el mismo peso a vocales, abecedario y números; las señas sin validación sostenida cuentan como cero. Matemáticas queda fuera durante alpha y beta. Estos valores no son resultados competitivos.
       </p>
 
       {/* SECCIÓN DE ESTADÍSTICAS GENERALES */}
@@ -132,7 +132,7 @@ const ProgressPage: React.FC = () => {
           {recentSessions.length > 0 ? recentSessions.map((session, index) => (
             <div key={index} className={styles.listItem}>
               <span>Practicaste: <strong>{session.category}: {session.label}</strong></span>
-              <span className={styles.score}>{session.score.toFixed(1)}%</span>
+              <span className={styles.score}>{session.completed ? session.score.toFixed(1) + '%' : 'Sin validar'}</span>
               <span className={styles.timestamp}>{formatTimestamp(session.timestamp)}</span>
             </div>
           )) : <p className={styles.noHistory}>Aún no hay sesiones recientes.</p>}
