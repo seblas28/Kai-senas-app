@@ -1,4 +1,5 @@
 // src/pages/MathCalculatorPage/MathCalculatorPage.tsx
+import { evaluateEquation } from '../../domain/math';
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './MathCalculatorPage.module.css';
 import PracticeView from '../../components/PracticeView/PracticeView';
@@ -84,8 +85,7 @@ const MathCalculatorPage: React.FC = () => {
   const solveEquation = () => {
     if (equation.length >= 3 && equation.length % 2 !== 0) {
       try {
-        const eqString = equation.join(' ').replace('Suma', '+').replace('Resta', '-');
-        const calcResult = new Function('return ' + eqString)();
+        const calcResult = evaluateEquation(equation);
         setResult(calcResult.toString());
         if (isSpeechEnabled) speak(`El resultado es ${calcResult}`);
       } catch (e) { /* ... */ }

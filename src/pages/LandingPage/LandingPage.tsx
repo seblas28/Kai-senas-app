@@ -5,12 +5,13 @@ import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { categoryData } from '../../data/signData';
 import { speak } from '../../utils/speech';
 import { useAuth } from '../../context/AuthContext';
+import { canManage, moduleStates, practiceBlock } from '../../domain/modules';
 import { useSpeech } from '../../context/SpeechContext';
 
 const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const { isSpeechEnabled } = useSpeech();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = canManage(user?.role);
 
   useEffect(() => {
     const hasWelcomed = sessionStorage.getItem('hasWelcomed');
@@ -35,7 +36,7 @@ const LandingPage: React.FC = () => {
 
       <section id="cursos" className={styles.coursesSection}>
         <div className={styles.cardGrid}>
-          {categoryData.map((category) => (
+          {categoryData.filter(category => moduleStates[category.id].visibility === 'visible').map((category) => (
             <CategoryCard
               key={category.id}
               title={category.title}
@@ -43,7 +44,8 @@ const LandingPage: React.FC = () => {
               practiceLink={category.id === 'matematicas' ? '/practice/matematicas' : `/practice/${category.id}`}
               trainLink={`/training/${category.id}`}
               isAdmin={isAdmin}
-              tag={category.tag}
+              tag={moduleStates[category.id].stage === 'stable' ? undefined : moduleStates[category.id].stage}
+              maintenanceReason={practiceBlock(moduleStates[category.id]) || undefined}
             />
           ))}
         </div>

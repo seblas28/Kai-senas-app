@@ -34,11 +34,14 @@ const TrainingPage: React.FC = () => {
   const [handLandmarker, setHandLandmarker] = useState<HandLandmarker | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [trainingData, setTrainingData] = useState<TrainingSample[]>([]);
-  const [lastCapturedHands, setLastCapturedHands] = useState<Frame[] | null>(null);
+  const lastCapturedHands = useRef<{ hands: Frame[]; frame: number; time: number } | null>(null);
+  const lastSampleFrame = useRef(-1);
+  const captureActive = useRef(true);
+  const streamRef = useRef<MediaStream | null>(null);
   
   const [isBursting, setIsBursting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const isSending = false;
   const [trainingSummary, setTrainingSummary] = useState<{ [key: string]: number }>({});
 
   const fetchSummary = useCallback(async () => {
@@ -76,6 +79,9 @@ const TrainingPage: React.FC = () => {
       if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
     }
 
+    captureActive.current = true;
+    let owned: HandLandmarker | null = null;
+    let cancelled = false;
     const createHandLandmarker = async () => {
       const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
       const landmarker = await HandLandmarker.createFromOptions(vision, {
@@ -83,18 +89,24 @@ const TrainingPage: React.FC = () => {
         runningMode: "VIDEO",
         numHands: 2, // Creamos un motor potente que puede ver hasta 2 manos desde el principio
       });
+      if (cancelled) { landmarker.close(); return; }
+      owned = landmarker;
       setHandLandmarker(landmarker);
       console.log("HandLandmarker inicializado una sola vez.");
     };
     
-    createHandLandmarker();
+    createHandLandmarker().catch(() => setFeedbackMessage('No se pudo cargar el detector de manos.'));
     fetchSummary();
     
     return () => {
       stopCamera(false);
-      handLandmarker?.close();
+      cancelled = true;
+      captureActive.current = false;
+      owned?.close();
+      streamRef.current?.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     };
-  }, [category, isSpeechEnabled, fetchSummary]);
+  }, [category, fetchSummary]);
 
   const handleGoHome = () => {
     stopCamera(true);
@@ -102,19 +114,25 @@ const TrainingPage: React.FC = () => {
   };
 
   const startCamera = async () => {
+    try {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (!captureActive.current || !videoRef.current) { stream.getTracks().forEach(track => track.stop()); return; }
+      streamRef.current = stream;
       videoRef.current.srcObject = stream;
       videoRef.current.addEventListener("loadeddata", () => {
         setIsCameraOn(true);
         isCameraOnRef.current = true;
-        predictWebcam();
+
         if(isSpeechEnabled) speak("Cámara encendida.");
-      });
+      }, { once: true });
     }
+    } catch { setFeedbackMessage('No se pudo acceder a la cámara. Comprueba sus permisos.'); }
   };
 
   const stopCamera = (shouldSpeak: boolean = true) => {
+    lastCapturedHands.current = null;
+    if (animationFrameId.current !== null) cancelAnimationFrame(animationFrameId.current);
     if (!isCameraOnRef.current) return;
     if (shouldSpeak && isSpeechEnabled) speak("Cámara apagada.");
     isCameraOnRef.current = false;
@@ -142,13 +160,13 @@ const TrainingPage: React.FC = () => {
     const results = handLandmarker.detectForVideo(video, performance.now());
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (results.landmarks && results.landmarks.length > 0) {
-      setLastCapturedHands(results.landmarks);
+      lastCapturedHands.current = { hands: results.landmarks, frame: video.currentTime, time: performance.now() };
       for (const landmarks of results.landmarks) {
         drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, drawingOptions.connector);
         drawingUtils.drawLandmarks(landmarks, drawingOptions.landmark);
       }
     } else {
-      setLastCapturedHands(null);
+      lastCapturedHands.current = null;
     }
     if (isCameraOnRef.current) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
@@ -172,76 +190,44 @@ const TrainingPage: React.FC = () => {
   const getSampleCount = (label: string) => trainingData.filter(d => d.label === label).length;
   const handleLabelSelect = (label: string) => { setSelectedLabel(label); if(isSpeechEnabled) speak(`Seleccionado: ${label}`); };
  
-  const handleCapture = () => {
-    if (lastCapturedHands && lastCapturedHands.length > 0) {
-      const combinedLandmarks = lastCapturedHands.flat();
-      const normalizedLandmarks = normalizeLandmarks(combinedLandmarks);
-      const newSample: TrainingSample = { landmarks: normalizedLandmarks, label: selectedLabel };
-      setTrainingData(prevData => [...prevData, newSample]);
-    }
+  const handleCapture = (): boolean => {
+    const sample = lastCapturedHands.current;
+    if (!sample || sample.frame === lastSampleFrame.current || performance.now() - sample.time > 500) return false;
+    lastSampleFrame.current = sample.frame;
+    const landmarks = normalizeLandmarks(sample.hands.flat());
+    setTrainingData(previous => [...previous, { landmarks, label: selectedLabel }]);
+    return true;
   };
-  
-  const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   const handleBurstCapture = async () => {
-    if (!lastCapturedHands) {
-      setFeedbackMessage('Mano no detectada.');
-      setTimeout(() => setFeedbackMessage(''), 3000);
-      return;
-    }
+    if (!lastCapturedHands.current) { setFeedbackMessage('Mano no detectada.'); return; }
     setIsBursting(true);
-    if(isSpeechEnabled) speak("Iniciando captura en ráfaga.");
-    for (let i = 3; i > 0; i--) {
-      setFeedbackMessage(`Prepárate en ${i}...`);
-      await delay(1000);
-    }
-    setFeedbackMessage(`¡Capturando ${SAMPLES_PER_BURST} muestras!`);
-    await new Promise<void>(resolve => {
-      let captureCount = 0;
-      const intervalId = setInterval(() => {
-        handleCapture();
-        captureCount++;
-        if (captureCount >= SAMPLES_PER_BURST) {
-          clearInterval(intervalId);
-          resolve();
-        }
-      }, 100);
-    });
-    const completionMessage = `Captura de ${selectedLabel} completada.`;
-    setFeedbackMessage(completionMessage);
-    if(isSpeechEnabled) speak(completionMessage);
-    setIsBursting(false);
-    setTimeout(() => setFeedbackMessage(''), 4000);
-  };
-  
-  const handleSendDataAndTrain = async () => {
-    if (trainingData.length === 0) return alert("No hay datos para enviar.");
-    const final_url = "http://localhost:5001/receive_data";
-    setIsSending(true);
-    setFeedbackMessage('Enviando datos al servidor...');
-    if(isSpeechEnabled) speak("Enviando datos para entrenar el modelo.");
+    let captured = 0;
     try {
-      const payload = { category: category, data: trainingData };
-      const response = await fetch(final_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
-      setFeedbackMessage('¡Entrenamiento completado! Actualizando resultados...');
-      if(isSpeechEnabled) speak("Entrenamiento completado. Actualizando resultados.");
-
-      await delay(2000);
-      await fetchSummary();
-      setFeedbackMessage('');
-
-    } catch (error) {
-      console.error('Error al enviar datos:', error);
-      setFeedbackMessage('Error al conectar con el servidor. ¿Está en ejecución?');
-      if(isSpeechEnabled) speak("Error al conectar con el servidor.");
-    } finally {
-      setIsSending(false);
-    }
+      for (let i = 3; i > 0; i--) {
+        if (!captureActive.current) return;
+        setFeedbackMessage('Prepárate en ' + i + '…');
+        await delay(1000);
+      }
+      const deadline = performance.now() + 10000;
+      while (captured < SAMPLES_PER_BURST && performance.now() < deadline && captureActive.current && isCameraOnRef.current) {
+        if (handleCapture()) captured++;
+        setFeedbackMessage('Muestras nuevas: ' + captured + ' / ' + SAMPLES_PER_BURST);
+        await delay(100);
+      }
+      if (captureActive.current) setFeedbackMessage('Se capturaron ' + captured + ' muestras de ' + selectedLabel + '.');
+    } finally { if (captureActive.current) setIsBursting(false); }
+  };
+  const handleSendDataAndTrain = () => {
+    if (!trainingData.length) return;
+    const blob = new Blob([JSON.stringify({ category, data: trainingData }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dataset-' + category + '-' + Date.now() + '.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setFeedbackMessage('Muestras exportadas. Entrena en tu equipo; publicar el modelo requerirá aprobación del superadmin.');
   };
 
   const handleClearSelectedLabelData = () => {
@@ -271,10 +257,11 @@ const TrainingPage: React.FC = () => {
             {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
         </div>
         <div className={styles.controls}>
+          <nav aria-label="Categoría de captura">{['vocales', 'abecedario', 'numeros', 'matematicas'].map(id => <a key={id} href={'/training/' + id} style={{ marginRight: '1rem' }}>{id}</a>)}</nav>
           <h1 className={styles.title}>
-            Entrenando Categoría: <span className={styles.highlight}>{category}</span>
+            Laboratorio local: <span className={styles.highlight}>{category}</span>
           </h1>
-          <p>Selecciona una seña de esta categoría y captura muestras.</p>
+          <p>Selecciona una seña y captura muestras nuevas. Descarga el dataset para entrenar en tu equipo. Esta pantalla no publica modelos.</p>
           <div className={styles.labelSelector}>
             {categoryLabels.map(label => (
               <button 
@@ -302,7 +289,7 @@ const TrainingPage: React.FC = () => {
               <button onClick={handleBurstCapture} className={`${styles.iconButton} ${styles.primary}`} disabled={!isCameraOn || isBursting || isSending} title="Capturar Ráfaga">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
               </button>
-              <button onClick={handleSendDataAndTrain} disabled={trainingData.length === 0 || isBursting || isSending} className={styles.iconButton} title="Enviar y Entrenar">
+              <button onClick={handleSendDataAndTrain} disabled={trainingData.length === 0 || isBursting || isSending} className={styles.iconButton} title="Descargar muestras para entrenamiento local" aria-label="Descargar muestras para entrenamiento local">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2.8-3.3-4.9-6.3-4.9h-1.3c-.3-1.3-1-2.4-2-3.2-1.4-1.1-3.1-1.8-5-1.8-3.4 0-6.2 2.7-6.5 6.1-.3 2.5 1 4.9 2.8 6.4"></path><path d="M16 16v6m-4-3l4 3 4-3"></path></svg>
               </button>
             </div>

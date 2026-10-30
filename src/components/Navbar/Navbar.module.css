@@ -98,3 +98,8 @@
   color: white;
   border-color: var(--danger-border);
 }
+
+@media (max-width: 900px) {
+  .container, .navItems, .navLinks { flex-wrap: wrap; gap: 0.75rem; }
+  .container { justify-content: center; }
+}

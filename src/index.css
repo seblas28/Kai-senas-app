@@ -63,3 +63,6 @@ html, body, #root {
 .main-content {
   flex-grow: 1;
 }
+.kai-notice { max-width: 760px; margin: 3rem auto; padding: 2rem; background: var(--card-bg); border-radius: 16px; line-height: 1.7; }
+.kai-eyebrow { color: var(--primary-color); font-weight: 700; }
+.kai-maintenance { border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; }

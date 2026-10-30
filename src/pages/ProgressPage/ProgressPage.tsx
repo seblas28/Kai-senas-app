@@ -6,43 +6,38 @@ import StatCard from '../../components/StatCard/StatCard';
 import CategoryProgressCard from '../../components/CategoryProgressCard/CategoryProgressCard';
 import { useSpeech } from '../../context/SpeechContext';
 import { speak } from '../../utils/speech';
+import { readProgress, progressKey, categoryAverage, globalAverage, clearProgress, type PracticeSession } from '../../domain/progress';
+import { countsInAverage, moduleStates } from '../../domain/modules';
+import { useAuth } from '../../context/AuthContext';
 
 // Interfaces para los datos de progreso
-interface SignProgress {
-  bestScore: number;
-  sessions: number;
-  totalTime: number;
-}
-interface RecentSession {
-  label: string;
-  score: number;
-  timestamp: number;
-}
 interface CategoryStats {
   completed: number;
   total: number;
 }
 
 const ProgressPage: React.FC = () => {
+  const { user } = useAuth();
   const { isSpeechEnabled } = useSpeech();
   const [summary, setSummary] = useState({ completedCourses: 0, avgPercentage: 0, totalSessions: 0, totalTime: "0m 0s" });
   const [progressStats, setProgressStats] = useState<{ [key: string]: CategoryStats }>({});
   const [showConfirm, setShowConfirm] = useState(false);
-  const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
+  const [recentSessions, setRecentSessions] = useState<PracticeSession[]>([]);
 
   const loadProgress = useCallback(() => {
-    const progressData: { [key: string]: SignProgress } = JSON.parse(localStorage.getItem('progressData') || '{}');
-    const recentData: RecentSession[] = JSON.parse(localStorage.getItem('recentSessions') || '[]');
+    const snapshot = readProgress(user?.id);
+    const progressData = snapshot.signs;
+    const recentData = snapshot.recentSessions;
     const newStats: { [key: string]: CategoryStats } = {};
 
-    let totalScore = 0, totalSessions = 0, totalTime = 0;
+    let totalSessions = 0, totalTime = 0;
     const practicedSigns = Object.keys(progressData);
 
     // Calcular estadísticas por categoría
     categoryData.forEach(category => {
       const signsInCategory = getSignsByCategory(category.id);
       const completedCount = signsInCategory.filter(
-        sign => (progressData[sign.label]?.bestScore || 0) >= 97
+        sign => (progressData[progressKey(category.id, sign.label)]?.bestScore || 0) >= 97
       ).length;
       newStats[category.id] = { completed: completedCount, total: signsInCategory.length };
     });
@@ -50,21 +45,21 @@ const ProgressPage: React.FC = () => {
     // Calcular estadísticas generales
     practicedSigns.forEach(label => {
       if (progressData[label]) {
-        totalScore += progressData[label].bestScore;
         totalSessions += progressData[label].sessions;
         totalTime += progressData[label].totalTime;
       }
     });
 
     const completedCoursesCount = Object.values(newStats).filter(stat => stat.completed === stat.total && stat.total > 0).length;
-    const avgPercentage = practicedSigns.length > 0 ? totalScore / practicedSigns.length : 0;
+    const eligible = categoryData.filter(category => countsInAverage(category.id, moduleStates[category.id]));
+    const avgPercentage = globalAverage(eligible.map(category => categoryAverage(snapshot, category.id, getSignsByCategory(category.id).map(sign => sign.label))));
     const minutes = Math.floor(totalTime / 60);
     const seconds = totalTime % 60;
     
     setRecentSessions(recentData.slice(0, 5));
     setProgressStats(newStats);
     setSummary({ completedCourses: completedCoursesCount, avgPercentage: parseFloat(avgPercentage.toFixed(1)), totalSessions, totalTime: `${minutes}m ${seconds}s` });
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     loadProgress();
@@ -83,8 +78,7 @@ const ProgressPage: React.FC = () => {
   }, [summary.completedCourses, isSpeechEnabled]);
 
   const handleClearProgress = () => {
-    localStorage.removeItem('progressData');
-    localStorage.removeItem('recentSessions');
+    clearProgress(user?.id);
     setShowConfirm(false);
     loadProgress();
     if (isSpeechEnabled) speak("Todo tu progreso ha sido reiniciado.");
@@ -98,14 +92,14 @@ const ProgressPage: React.FC = () => {
     <div className={styles.pageWrapper}>
       <h1 className={styles.title}>Mi Progreso</h1>
       <p className={styles.subtitle}>
-        Aquí puedes ver tu progreso general y el historial de tus sesiones de práctica.
+        Progreso personal guardado en este navegador. El promedio da el mismo peso a vocales, abecedario y números; las señas aún no practicadas cuentan como cero. Matemáticas queda fuera durante alpha y beta. Estos valores no son resultados competitivos.
       </p>
 
       {/* SECCIÓN DE ESTADÍSTICAS GENERALES */}
       <section className={styles.section}>
         <div className={styles.statsGrid}>
           <StatCard label="Cursos Completados" value={`${summary.completedCourses} / ${categoryData.length}`} icon="🏆" />
-          <StatCard label="Promedio General" value={`${summary.avgPercentage}%`} icon="📊" />
+          <StatCard label="Promedio de práctica" value={`${summary.avgPercentage}%`} icon="📊" />
           <StatCard label="Sesiones Totales" value={summary.totalSessions} icon="🔄" />
           <StatCard label="Tiempo Total" value={summary.totalTime} icon="⏱️" />
         </div>
@@ -137,7 +131,7 @@ const ProgressPage: React.FC = () => {
         <div className={styles.list}>
           {recentSessions.length > 0 ? recentSessions.map((session, index) => (
             <div key={index} className={styles.listItem}>
-              <span>Practicaste: <strong>{session.label}</strong></span>
+              <span>Practicaste: <strong>{session.category}: {session.label}</strong></span>
               <span className={styles.score}>{session.score.toFixed(1)}%</span>
               <span className={styles.timestamp}>{formatTimestamp(session.timestamp)}</span>
             </div>
@@ -148,9 +142,9 @@ const ProgressPage: React.FC = () => {
       {/* SECCIÓN DE OPCIONES */}
       <section className={`${styles.section} ${styles.dangerZone}`}>
         <h2 className={styles.sectionTitle}>Opciones</h2>
-        <p>Si deseas comenzar de nuevo, puedes eliminar todo tu progreso de práctica.</p>
+        <p>Puedes reiniciar el progreso nuevo de este navegador. Los registros de la versión anterior se conservan por separado.</p>
         <button onClick={() => setShowConfirm(true)} className={styles.resetButton}>
-          Reiniciar Todo el Progreso
+          Reiniciar progreso local
         </button>
       </section>
 
@@ -159,7 +153,7 @@ const ProgressPage: React.FC = () => {
         <div className={styles.confirmOverlay}>
           <div className={styles.confirmModal}>
             <h3>¿Estás seguro?</h3>
-            <p>Esta acción eliminará permanentemente todos tus datos de práctica.</p>
+            <p>Se borrará el progreso nuevo de este navegador; no se borrarán los registros de la versión anterior.</p>
             <div className={styles.confirmActions}>
               <button onClick={() => setShowConfirm(false)} className={styles.cancelButton}>Cancelar</button>
               <button onClick={handleClearProgress} className={styles.confirmButton}>Sí, eliminar</button>

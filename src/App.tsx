@@ -1,5 +1,7 @@
 // src/App.tsx
 import React from 'react';
+import ModuleGate from './components/ModuleGate';
+import RankingPage from './pages/RankingPage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SpeechProvider } from './context/SpeechContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -25,11 +27,12 @@ const App: React.FC = () => {
               <main className="main-content">
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
-                  <Route path="/practice/matematicas" element={<MathCalculatorPage />} />
-                  <Route path="/practice/:category" element={<CategoryPracticePage />} />
-                  <Route path="/practice/:category/:sign" element={<PracticePage />} />
+                  <Route path="/practice/matematicas" element={<ModuleGate><MathCalculatorPage /></ModuleGate>} />
+                  <Route path="/practice/:category" element={<ModuleGate><CategoryPracticePage /></ModuleGate>} />
+                  <Route path="/practice/:category/:sign" element={<ModuleGate><PracticePage /></ModuleGate>} />
                   <Route path="/progreso" element={<ProgressPage />} />
-                  <Route path="/training/:category" element={<TrainingPage />} /> 
+                  <Route path="/training/:category" element={<ModuleGate training><TrainingPage /></ModuleGate>} /> 
+                  <Route path="/ranking" element={<RankingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                 </Routes>
               </main>

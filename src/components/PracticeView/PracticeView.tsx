@@ -7,6 +7,8 @@ import styles from "./PracticeView.module.css";
 import { speak } from '../../utils/speech';
 import { useSpeech } from "../../context/SpeechContext";
 import { allSignData } from "../../data/signData";
+import { saveAttempt } from '../../domain/progress';
+import { useAuth } from '../../context/AuthContext';
 
 interface PracticeViewProps {
   category?: 'vocales' | 'numeros' | 'matematicas';
@@ -25,6 +27,11 @@ const drawingOptions = {
 };
 
 const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onPrediction }) => {
+  const { user } = useAuth();
+  const componentActive = useRef(true);
+  const streamRef = useRef<MediaStream | null>(null);
+  const savedSessionRef = useRef(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isScanningRef = useRef(false);
@@ -56,6 +63,13 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     if (sign && !onPrediction){
       if (isSpeechEnabled) speak(`Vamos a practicar ${sign}`);
     }
+    componentActive.current = true;
+    setIsCameraOn(false);
+    setIsScanning(false);
+    setLabels([]);
+    let cancelled = false;
+    let ownedLandmarker: HandLandmarker | null = null;
+    let ownedModel: tf.LayersModel | null = null;
     const setup = async () => {
       try {
         if(!category) return;
@@ -70,6 +84,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
           runningMode: "VIDEO",
           numHands: handsToDetect,
         });
+        if (cancelled) { landmarker.close(); return; }
+        ownedLandmarker = landmarker;
         setHandLandmarker(landmarker);
 
         const modelUrl = `/tfjs_${category}/model.json`;
@@ -77,33 +93,55 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
         
         setLoadingMessage("Cargando modelo de IA...");
         const model = await tf.loadLayersModel(modelUrl);
+        if (cancelled) { model.dispose(); return; }
+        ownedModel = model;
         setIaModel(model);
         
         setLoadingMessage("Cargando etiquetas...");
-        const labelsData = await fetch(labelsUrl).then(res => res.json());
+        const labelsResponse = await fetch(labelsUrl);
+        if (!labelsResponse.ok) throw new Error('Etiquetas no disponibles');
+        const labelsData: unknown = await labelsResponse.json();
+        if (!Array.isArray(labelsData) || !labelsData.every(label => typeof label === 'string') || labelsData.length !== model.outputs[0].shape[1]) throw new Error('Modelo y etiquetas incompatibles');
+        if (cancelled) return;
         setLabels(labelsData);
 
         setIsLoading(false);
 
       } catch (error) {
+        if (cancelled) return;
         console.error(`Error fatal durante la inicialización para [${category}]:`, error);
         setLoadingMessage("Error al cargar modelos. Verifica los archivos en /public.");
       }
     };
     setup();
-  }, [category, sign, isSpeechEnabled, onPrediction]);
+    return () => {
+      cancelled = true;
+      componentActive.current = false;
+      isScanningRef.current = false;
+      if (animationFrameId.current !== null) cancelAnimationFrame(animationFrameId.current);
+      if (debounceTimeout.current !== null) clearTimeout(debounceTimeout.current);
+      streamRef.current?.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+      ownedLandmarker?.close();
+      ownedModel?.dispose();
+    };
+  }, [category, sign]);
 
   const startCamera = async () => {
+    try {
     if (navigator.mediaDevices?.getUserMedia && videoRef.current) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (!componentActive.current || !videoRef.current) { stream.getTracks().forEach(track => track.stop()); return; }
+      streamRef.current = stream;
       videoRef.current.srcObject = stream;
       videoRef.current.addEventListener("loadeddata", () => {
         setIsCameraOn(true);
         if (isSpeechEnabled) speak("Cámara encendida.");
         isScanningRef.current = true; // Empezamos a dibujar el esqueleto en cuanto se enciende
-        predictWebcam();
-      });
+
+      }, { once: true });
     }
+    } catch { setSaveError('No se pudo acceder a la cámara. Comprueba sus permisos e inténtalo de nuevo.'); }
   };
 
   const stopCamera = () => {
@@ -118,6 +156,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   };
 
   const startScan = () => {
+    savedSessionRef.current = false;
+    setSaveError(null);
     setIsTaskCompleted(false);
     setIsScanning(true);
     bestSessionScoreRef.current = 0;
@@ -135,18 +175,9 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   };
 
   const saveProgress = (currentScore: number, practiceTime: number) => {
-    if (!sign) return;
-    const progressData = JSON.parse(localStorage.getItem('progressData') || '{}');
-    const recentSessions = JSON.parse(localStorage.getItem('recentSessions') || '[]');
-    const signData = progressData[sign] || { bestScore: 0, sessions: 0, totalTime: 0 };
-    signData.bestScore = Math.max(signData.bestScore, currentScore);
-    signData.sessions += 1;
-    signData.totalTime += Math.round(practiceTime);
-    progressData[sign] = signData;
-    const newSession = { label: sign, score: currentScore, timestamp: Date.now() };
-    recentSessions.unshift(newSession);
-    localStorage.setItem('progressData', JSON.stringify(progressData));
-    localStorage.setItem('recentSessions', JSON.stringify(recentSessions.slice(0, 20)));
+    if (!sign || !category || savedSessionRef.current) return;
+    savedSessionRef.current = true;
+    if (!saveAttempt(category, sign, currentScore, practiceTime, user?.id)) setSaveError('No se pudo guardar la sesión en este navegador.');
   };
 
   const predictWebcam = useCallback(() => {
@@ -234,18 +265,19 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     while(flattened.length < expectedSize){
       flattened.push(0);
     }
-    const inputTensor = tf.tensor2d([flattened]);
-    const predictionTensor = iaModel.predict(inputTensor) as tf.Tensor;
-    const predictionData = predictionTensor.dataSync();
-    const maxConfidenceIndex = predictionData.indexOf(Math.max(...predictionData));
-    if (maxConfidenceIndex < 0 || maxConfidenceIndex >= labels.length) return null;
-    const predictedLabel = labels[maxConfidenceIndex];
-    const maxConfidence = predictionData[maxConfidenceIndex];
-    return { sign: predictedLabel, confidence: maxConfidence };
+    if (flattened.length !== expectedSize || flattened.some(value => !Number.isFinite(value))) return null;
+    const data = tf.tidy(() => {
+      const inputTensor = tf.tensor2d([flattened]);
+      const predictionTensor = iaModel.predict(inputTensor) as tf.Tensor;
+      return Array.from(predictionTensor.dataSync());
+    });
+    const index = data.indexOf(Math.max(...data));
+    return index < 0 || index >= labels.length ? null : { sign: labels[index], confidence: data[index] };
   };
 
   return (
     <div className={styles.container}>
+      {saveError && <p role="alert">{saveError}</p>}
       <div className={styles.mediaContainer}>
         <video ref={videoRef} autoPlay playsInline className={styles.video}></video>
         <canvas ref={canvasRef} className={styles.canvas}></canvas>
