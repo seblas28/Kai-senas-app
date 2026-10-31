@@ -1,0 +1,86 @@
+.page { max-width: 1240px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+.header { display: flex; justify-content: space-between; align-items: start; gap: 2rem; margin-bottom: 2rem; }
+.header h1 { margin: .4rem 0 .7rem; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.045em; }
+.header p, .muted { color: var(--text-color-light); line-height: 1.7; }
+.eyebrow { font-size: .7rem; font-weight: 800; letter-spacing: .14em; color: var(--primary-color) !important; margin: 0 0 .65rem; }
+.roleBadge, .statusBadge { display: inline-block; padding: .5rem .8rem; border-radius: 30px; font-size: .75rem; font-weight: 700; background: var(--background-color); color: var(--primary-color); border: 1px solid var(--border-color); }
+.roleBadge { margin-top: .4rem; }
+.summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.summary > div { display: grid; gap: .7rem; border: 1px solid var(--border-color); background: var(--card-bg); padding: 1.5rem; border-radius: 16px; }
+.summary span { font-size: .85rem; font-weight: 600; }
+.summary strong { font-size: 2rem; color: var(--primary-color); }
+.summary .summaryWord { font-size: 1.15rem; min-height: 2.4rem; display: flex; align-items: center; overflow-wrap: anywhere; }
+.summary small, .help, .resultCount { color: var(--text-color-light); line-height: 1.6; font-size: .8rem; }
+.sectionNav { display: flex; gap: .5rem; padding: .4rem; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 2rem; background: var(--card-bg); flex-wrap: wrap; }
+.sectionNav button { background: transparent; border: 0; color: var(--text-color-light); font: inherit; padding: .85rem 1.15rem; cursor: pointer; border-radius: 8px; font-size: .9rem; }
+.sectionNav button[aria-current] { background: #4a47a3; color: #fff; }
+.workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 2rem; align-items: start; }
+.sidebar { border: 1px solid var(--border-color); padding: 1rem; border-radius: 16px; background: var(--card-bg); }
+.sidebar h2 { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-color-light); padding: .5rem .6rem; }
+.sidebar button { display: grid; gap: .45rem; width: 100%; text-align: left; padding: 1rem; font: inherit; color: var(--text-color); background: transparent; border: 1px solid transparent; border-radius: 10px; cursor: pointer; margin-bottom: .4rem; }
+.sidebar button[aria-pressed="true"] { background: var(--background-color); border-color: var(--primary-color); }
+.sidebar button span { font-size: .72rem; color: var(--text-color-light); }
+.sidebar > p { font-size: .8rem; color: var(--text-color-light); line-height: 1.7; padding: .5rem .6rem; }
+.content { min-width: 0; }
+.sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 1.5rem; }
+.sectionHeading h2, .panel h2 { font-size: 1.5rem; margin: 0 0 .35rem; letter-spacing: -.025em; }
+.sectionHeading p { margin: .5rem 0 0; color: var(--text-color-light); line-height: 1.6; }
+.textLink { color: var(--primary-color); font-size: .85rem; text-decoration: none; font-weight: 700; }
+.maintenanceForm, .panel, .reviewPanel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.7rem; margin-bottom: 1.5rem; }
+.page fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.page legend { font-size: 1.1rem; font-weight: 700; padding: 0; margin-bottom: 1.5rem; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+.formGrid label, .filters label, .standaloneLabel { display: grid; gap: .6rem; font-size: .85rem; font-weight: 600; }
+.fullWidth { grid-column: 1 / -1; }
+.page input:not([type="checkbox"]), .page select, .page textarea { width: 100%; min-width: 0; padding: .8rem; color: var(--text-color); background: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; font: inherit; font-size: .9rem; }
+.page textarea { resize: vertical; }
+.formFooter { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.formFooter > span { font-size: .8rem; color: var(--text-color-light); line-height: 1.6; }
+.primaryButton, .secondaryButton, .dangerButton { display: inline-block; font: inherit; font-size: .85rem; font-weight: 700; padding: .8rem 1rem; border-radius: 9px; border: 1px solid transparent; cursor: pointer; line-height: 1.4; }
+.primaryButton { background: #4a47a3; color: #fff; }
+.secondaryButton { border-color: var(--border-color); background: var(--card-bg); color: var(--primary-color); }
+.dangerButton { border-color: var(--danger-border-light); background: var(--danger-bg); color: var(--danger-text); }
+.page button:disabled { opacity: .5; cursor: not-allowed; }
+.page button:not(:disabled):hover { filter: brightness(.95); }
+.message { font-size: .85rem; line-height: 1.7; color: var(--primary-color); margin: .5rem 0 0; }
+.message:empty { display: none; }
+.error { padding: 1rem; background: var(--danger-bg); border: 1px solid var(--danger-border-light); color: var(--danger-text); border-radius: 10px; line-height: 1.7; }
+.warning, .infoBox { padding: 1rem; background: var(--background-color); border-left: 3px solid var(--primary-color); border-radius: 6px; font-size: .85rem; line-height: 1.8; margin-bottom: 1.5rem; }
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.resultCount { margin: 1rem 0; }
+.exercise { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; margin: .65rem 0; }
+.exercise summary { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; cursor: pointer; list-style: none; }
+.exercise summary::-webkit-details-marker { display: none; }
+.exercise summary > strong { font-size: 1.15rem; margin-right: auto; }
+.exercise summary > span { color: var(--text-color-light); font-size: .8rem; }
+.exercise[open] summary { border-bottom: 1px solid var(--border-color); }
+.exercise .maintenanceForm { margin: 0; border: 0; }
+.empty { text-align: center; padding: 2.5rem 1rem; background: var(--background-color); border-radius: 12px; color: var(--text-color-light); line-height: 1.7; }
+.tableScroll { overflow-x: auto; }
+.permissionTable { border-collapse: collapse; width: 100%; margin: 1.5rem 0; font-size: .85rem; }
+.permissionTable caption { text-align: left; font-weight: 700; margin-bottom: 1rem; }
+.permissionTable th, .permissionTable td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); }
+.permissionTable thead { background: var(--background-color); }
+.infoBox h3 { margin-top: 0; }
+.modelsWorkspace { display: grid; gap: .5rem; }
+.workflow { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); list-style: none; gap: 1rem; padding: 0; margin: 2rem 0; }
+.workflow li { display: grid; gap: .5rem; padding: 1.2rem; background: var(--background-color); border-radius: 12px; }
+.workflow span { color: var(--primary-color); font-size: .75rem; font-weight: 800; }
+.workflow small { color: var(--text-color-light); }
+.help { font-weight: 400; }
+.reviewPanel { border: 2px solid var(--primary-color); }
+.reviewPanel p, .panel > p { line-height: 1.8; }
+.hash { overflow-wrap: anywhere; font: .75rem monospace; color: var(--text-color-light); }
+.checkboxLabel { display: flex; gap: .7rem; align-items: start; margin: 1.5rem 0; line-height: 1.7; font-size: .85rem; }
+.checkboxLabel input { margin-top: .4rem; flex-shrink: 0; }
+.standaloneLabel { margin-bottom: 1.5rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.versionCard { border-top: 1px solid var(--border-color); padding: 1.5rem 0; }
+.versionCard > p { line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.versionHeading { display: flex; gap: 1rem; justify-content: space-between; align-items: start; }
+.versionHeading small { color: var(--text-color-light); }
+.versionHeading h3 { margin: .4rem 0; overflow-wrap: anywhere; }
+.reviewNote { background: var(--background-color); border-radius: 8px; padding: 1rem; font-size: .85rem; }
+.page :is(a,button,input,textarea,select,summary):focus-visible { outline: 3px solid var(--primary-color); outline-offset: 4px; }
+@media(max-width: 900px) { .summary { grid-template-columns: repeat(2,minmax(0,1fr)); } .workspace { grid-template-columns: 180px minmax(0,1fr); gap: 1rem; } .maintenanceForm, .panel, .reviewPanel { padding: 1.2rem; } .formFooter { align-items: start; flex-direction: column; } }
+@media(max-width: 650px) { .page { padding: 2rem 1rem; } .header { gap: .5rem; } .header > div { min-width: 0; } .roleBadge { font-size: .65rem; padding: .5rem; } .summary { gap: .7rem; } .summary > div { padding: 1rem; } .workspace { grid-template-columns: 1fr; } .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; } .sidebar h2, .sidebar > p { grid-column: 1 / -1; } .sidebar > p { margin: 0; } .sidebar button { padding: .8rem; } .formGrid, .filters, .workflow { grid-template-columns: 1fr; } .sectionHeading, .versionHeading { align-items: start; flex-direction: column; } .sectionNav button { flex-grow: 1; font-size: .8rem; padding: .7rem; } .workflow { gap: .6rem; } .workflow li { grid-template-columns: 1.5rem 1fr; } .workflow small { grid-column: 2; } .permissionTable th, .permissionTable td { padding: .8rem; } }

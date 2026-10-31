@@ -79,6 +79,101 @@ export type Database = {
           },
         ]
       }
+      model_channels: {
+        Row: {
+          active_version: string
+          module_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active_version: string
+          module_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active_version?: string
+          module_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_channels_active_version_module_id_fkey"
+            columns: ["active_version", "module_id"]
+            isOneToOne: false
+            referencedRelation: "model_versions"
+            referencedColumns: ["id", "module_id"]
+          },
+          {
+            foreignKeyName: "model_channels_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: true
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_versions: {
+        Row: {
+          artifact_bytes: number
+          artifact_hash: string
+          created_at: string
+          id: string
+          labels: string[]
+          module_id: string
+          notes: string
+          published_at: string | null
+          review_note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string | null
+          version: string
+        }
+        Insert: {
+          artifact_bytes: number
+          artifact_hash: string
+          created_at?: string
+          id?: string
+          labels: string[]
+          module_id: string
+          notes: string
+          published_at?: string | null
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          version: string
+        }
+        Update: {
+          artifact_bytes?: number
+          artifact_hash?: string
+          created_at?: string
+          id?: string
+          labels?: string[]
+          module_id?: string
+          notes?: string
+          published_at?: string | null
+          review_note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_versions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           id: string
@@ -203,7 +298,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_active_model: { Args: { p_module: string }; Returns: Json }
+      get_model_artifact: { Args: { p_id: string }; Returns: Json }
+      publish_model: {
+        Args: { p_expected_active?: string; p_id: string }
+        Returns: undefined
+      }
+      review_model: {
+        Args: { p_approve: boolean; p_id: string; p_note: string }
+        Returns: undefined
+      }
+      submit_model: {
+        Args: {
+          p_bundle: Json
+          p_module: string
+          p_notes: string
+          p_version: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

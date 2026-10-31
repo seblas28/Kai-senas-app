@@ -6,6 +6,7 @@ import * as tf from '@tensorflow/tfjs';
 import styles from "./PracticeView.module.css";
 import { speak } from '../../utils/speech';
 import { useSpeech } from "../../context/SpeechContext";
+import { loadPracticeModel } from '../../lib/modelRuntime';
 import { allSignData } from "../../data/signData";
 import { useProgress } from '../../context/ProgressContext';
 import { useAuth } from '../../context/AuthContext';
@@ -100,29 +101,19 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
         ownedLandmarker = landmarker;
         setHandLandmarker(landmarker);
 
-        const modelUrl = `/tfjs_${category}/model.json`;
-        const labelsUrl = `/labels_${category}.json`;
-        
-        setLoadingMessage("Cargando modelo de IA...");
-        const model = await tf.loadLayersModel(modelUrl);
+        setLoadingMessage("Cargando modelo de IA publicado...");
+        const { model, labels: modelLabels } = await loadPracticeModel(category);
         if (cancelled) { model.dispose(); return; }
         ownedModel = model;
         setIaModel(model);
-        
-        setLoadingMessage("Cargando etiquetas...");
-        const labelsResponse = await fetch(labelsUrl);
-        if (!labelsResponse.ok) throw new Error('Etiquetas no disponibles');
-        const labelsData: unknown = await labelsResponse.json();
-        if (!Array.isArray(labelsData) || !labelsData.every(label => typeof label === 'string') || labelsData.length !== model.outputs[0].shape[1]) throw new Error('Modelo y etiquetas incompatibles');
-        if (cancelled) return;
-        setLabels(labelsData);
+        setLabels(modelLabels);
 
         setIsLoading(false);
 
       } catch (error) {
         if (cancelled) return;
         console.error(`Error fatal durante la inicialización para [${category}]:`, error);
-        setLoadingMessage("Error al cargar modelos. Verifica los archivos en /public.");
+        setLoadingMessage("No se pudo cargar la IA. Comprueba la conexión y vuelve a abrir la práctica.");
       }
     };
     setup();
