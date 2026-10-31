@@ -1,0 +1,52 @@
+.page { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+.header { display: flex; justify-content: space-between; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+.header h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; letter-spacing: -.045em; margin: .6rem 0 1rem; }
+.header > div > p:last-child { color: var(--text-color-light); line-height: 1.8; max-width: 620px; }
+.eyebrow { font-size: .7rem; letter-spacing: .14em; font-weight: 800; color: var(--primary-color); margin: 0 0 1rem; }
+.primary, .secondary, .dangerButton { display: inline-flex; align-items: center; justify-content: center; gap: 1rem; font: inherit; font-size: .85rem; font-weight: 700; padding: .9rem 1.2rem; border-radius: 10px; text-decoration: none; border: 1px solid transparent; cursor: pointer; line-height: 1.5; }
+.primary { background: #4a47a3; color: white; }
+.primary:hover { background: #39377f; }
+.secondary { background: var(--card-bg); border-color: var(--border-color); color: var(--primary-color); }
+.dangerButton { background: var(--danger-bg); border-color: var(--danger-border-light); color: var(--danger-text); }
+.page button:disabled { opacity: .5; cursor: not-allowed; }
+.page :is(a,button,input,select,summary):focus-visible { outline: 3px solid var(--primary-color); outline-offset: 4px; }
+.error { padding: 1rem; border: 1px solid var(--danger-border-light); color: var(--danger-text); background: var(--danger-bg); border-radius: 9px; line-height: 1.7; font-size: .9rem; }
+.info, .notice { background: var(--card-bg); color: var(--primary-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem; font-size: .9rem; line-height: 1.8; }
+.help { font-size: .8rem; line-height: 1.7; color: var(--text-color-light); }
+.badge, .pill { font-size: .75rem; font-weight: 600; color: var(--primary-color); border: 1px solid var(--border-color); padding: .6rem .8rem; border-radius: 30px; background: var(--card-bg); }
+@media(max-width:650px) { .page { padding: 2rem 1rem; } .header { flex-direction: column; align-items: start; gap: .6rem; } }
+
+.profileLayout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.accessLayout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+.formPanel, .quickPanel, .sessionPanel { padding: 2rem; border: 1px solid var(--border-color); border-radius: 18px; background: var(--card-bg); min-width: 0; }
+.panelHeading h2, .quickPanel h2, .sessionPanel h2 { font-size: 1.5rem; letter-spacing: -.025em; margin: 0 0 .6rem; }
+.panelHeading > p:last-child, .sessionPanel p { color: var(--text-color-light); font-size: .9rem; line-height: 1.8; }
+.formPanel fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.field { display: grid; gap: .6rem; font-size: .9rem; font-weight: 600; margin: 1.3rem 0; }
+.field input { padding: .9rem; background: var(--background-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 9px; font: inherit; width: 100%; min-width: 0; }
+.formPanel form .primary { width: 100%; margin-top: 1rem; }
+.modeSwitch { display: flex; gap: .4rem; background: var(--background-color); padding: .35rem; border-radius: 10px; margin: 1.5rem 0; }
+.modeSwitch button { flex: 1; padding: .75rem .5rem; border: 1px solid transparent; background: transparent; color: var(--text-color-light); border-radius: 7px; font: inherit; font-size: .85rem; cursor: pointer; }
+.modeSwitch button[aria-pressed="true"] { background: var(--card-bg); color: var(--primary-color); border-color: var(--border-color); font-weight: 700; }
+.passwordToggle { padding: .3rem 0; background: none; border: 0; color: var(--primary-color); cursor: pointer; font: inherit; font-size: .8rem; }
+.formLinks { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
+.formLinks a, .formLinks button { background: none; border: 0; padding: 0; color: var(--primary-color); text-decoration: none; font: inherit; font-size: .8rem; cursor: pointer; line-height: 1.7; }
+.identity { display: flex; gap: 1rem; align-items: center; background: var(--background-color); padding: 1.2rem; border-radius: 12px; margin: 1.5rem 0; }
+.avatar { display: grid; place-items: center; flex-shrink: 0; width: 46px; height: 46px; border-radius: 13px; background: #4a47a3; color: #fff; font-size: 1.3rem; font-weight: 700; }
+.identity > div { min-width: 0; display: grid; gap: .5rem; }
+.identity strong { overflow-wrap: anywhere; }
+.identity div > span { font-size: .8rem; color: var(--text-color-light); overflow-wrap: anywhere; }
+.sideColumn { display: grid; gap: 1.5rem; }
+.quickPanel a { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.2rem 0; border-bottom: 1px solid var(--border-color); color: var(--text-color); text-decoration: none; }
+.quickPanel a:last-child { border-bottom: 0; padding-bottom: 0; }
+.quickPanel a > span:first-child { display: grid; gap: .5rem; }
+.quickPanel a small { color: var(--text-color-light); line-height: 1.7; }
+.quickPanel a > span:last-child { color: var(--primary-color); }
+.welcomePanel { border-radius: 22px; background: #e7e6fa; color: #373474; padding: 2.5rem; }
+.welcomeMark { display: inline-block; font-size: 4.5rem; font-weight: 800; letter-spacing: -.08em; margin: 0 0 2.5rem; }
+.welcomePanel h2 { font-size: clamp(1.8rem,3vw,2.5rem); letter-spacing: -.04em; line-height: 1.2; margin: 0 0 1.5rem; }
+.welcomePanel p, .welcomePanel li { line-height: 1.9; font-size: .9rem; }
+.welcomePanel ul { padding-left: 1.2rem; margin: 1.5rem 0 2rem; }
+.welcomePanel a { color: #373474; font-size: .85rem; font-weight: 700; text-decoration: none; }
+@media(max-width:800px) { .accessLayout, .profileLayout { grid-template-columns: 1fr; } .welcomePanel { padding: 1.8rem; } .welcomeMark { margin-bottom: 1rem; font-size: 3rem; } .welcomePanel ul { margin-bottom: 1rem; } .formPanel, .quickPanel, .sessionPanel { padding: 1.5rem; } }
+.accessLayout > .formPanel:only-child { grid-column: 1 / -1; max-width: 560px; width: 100%; justify-self: center; }
