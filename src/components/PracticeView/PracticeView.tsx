@@ -66,9 +66,6 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   const CONFIDENCE_THRESHOLD = 70;
 
   useEffect(() => {
-    if (sign && !onPrediction){
-      if (isSpeechEnabled) speak(`Vamos a practicar ${sign}`);
-    }
     componentActive.current = true;
     setIsCameraOn(false);
     setIsScanning(false);

@@ -1,15 +1,13 @@
 // src/pages/CategoryPracticePage/CategoryPracticePage.tsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styles from './CategoryPracticePage.module.css';
 import { getSignsByCategory } from '../../data/signData';
 import PracticeCard from '../../components/PracticeCard/PracticeCard';
-import { speak } from '../../utils/speech';
 import { progressKey } from '../../domain/progress';
 import { isModuleId, practiceBlock } from '../../domain/modules';
 import { useCatalog } from '../../context/CatalogContext';
 import { useProgress } from '../../context/ProgressContext';
-import { useSpeech } from '../../context/SpeechContext';
 
 
 
@@ -17,16 +15,8 @@ const CategoryPracticePage: React.FC = () => {
   const { states: moduleStates } = useCatalog();
   const { snapshot } = useProgress();
   const progressData = snapshot.signs;
-  const { isSpeechEnabled } = useSpeech();
   const { category } = useParams<{ category: string }>();
 
-  useEffect(() => {
-
-    if (category && isSpeechEnabled){
-      speak(`Practicar ${category}`);
-    }
-  }, [category, isSpeechEnabled]); // El array vacío asegura que esto solo se ejecute una vez
-  
   if (!category) {
     return <div>Categoría no encontrada.</div>;
   }
