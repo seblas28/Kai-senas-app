@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from 'react';
-import ModuleGate from './components/ModulesGate/ModuleGate';
+import ModuleGate from './components/ModuleGate/ModuleGate';
 import RankingPage from './pages/RankingPage/RankingPage';
 import MaintenancePage from './pages/MaintenancePage/MaintenancePage';
 import { useAuth } from './context/AuthContext';
