@@ -1,1 +1,1 @@
-﻿export { default } from '../ConnectedProgressPage';
+﻿export { default } from '../ConnectedProgressPage/ConnectedProgressPage';

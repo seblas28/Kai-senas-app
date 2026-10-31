@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './ProgressPage/ProgressPage.module.css';
-import { categoryData, getSignsByCategory } from '../data/signData';
-import StatCard from '../components/StatCard/StatCard';
-import CategoryProgressCard from '../components/CategoryProgressCard/CategoryProgressCard';
-import { useAuth } from '../context/AuthContext';
-import { useProgress } from '../context/ProgressContext';
-import { useCatalog } from '../context/CatalogContext';
-import { categoryAverage, globalAverage, progressKey } from '../domain/progress';
-import { countsInAverage } from '../domain/modules';
+import { categoryData, getSignsByCategory } from '../../data/signData';
+import StatCard from '../../components/StatCard/StatCard';
+import CategoryProgressCard from '../../components/CategoryProgressCard/CategoryProgressCard';
+import { useAuth } from '../../context/AuthContext';
+import { useProgress } from '../../context/ProgressContext';
+import { useCatalog } from '../../context/CatalogContext';
+import { categoryAverage, globalAverage, progressKey } from '../../domain/progress';
+import { countsInAverage } from '../../domain/modules';
 
 export default function ConnectedProgressPage() {
   const { user } = useAuth();

@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useCatalog } from '../context/CatalogContext';
-import { canManage } from '../domain/modules';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { useCatalog } from '../../context/CatalogContext';
+import { canManage } from '../../domain/modules';
+import { supabase } from '../../lib/supabase';
 
 function MaintenanceForm({ moduleId, label, status, visibility, reason, afterSave }: { moduleId: string; label?: string; status: string; visibility: string; reason: string; afterSave: () => Promise<void> }) {
   const [values, setValues] = useState({ status, visibility, maintenance_reason: reason });

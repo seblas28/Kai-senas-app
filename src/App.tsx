@@ -1,8 +1,8 @@
 // src/App.tsx
 import React from 'react';
-import ModuleGate from './components/ModuleGate';
-import RankingPage from './pages/RankingPage';
-import MaintenancePage from './pages/MaintenancePage';
+import ModuleGate from './components/ModulesGate/ModuleGate';
+import RankingPage from './pages/RankingPage/RankingPage';
+import MaintenancePage from './pages/MaintenancePage/MaintenancePage';
 import { useAuth } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { ProgressProvider } from './context/ProgressContext';
