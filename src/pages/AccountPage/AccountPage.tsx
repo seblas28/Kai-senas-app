@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, authMessage } from '../../lib/supabase';
-import styles from './LoginPage/LoginPage.module.css';
+import styles from '../LoginPage/LoginPage.module.css';
 
 export default function AccountPage() {
   const { user, error: identityError, roleLoading, refreshIdentity, recovering, finishRecovery, signOut } = useAuth();

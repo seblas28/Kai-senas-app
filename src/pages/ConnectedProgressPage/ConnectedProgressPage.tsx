@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './ProgressPage/ProgressPage.module.css';
+import styles from '../ProgressPage/ProgressPage.module.css';
 import { categoryData, getSignsByCategory } from '../../data/signData';
 import StatCard from '../../components/StatCard/StatCard';
 import CategoryProgressCard from '../../components/CategoryProgressCard/CategoryProgressCard';
