@@ -1,9 +1,9 @@
 import { Link, useParams, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { isModuleId, canManage, practiceBlock } from '../domain/modules';
-import { useCatalog } from '../context/CatalogContext';
-import { useAuth } from '../context/AuthContext';
-import { getSignsByCategory } from '../data/signData';
+import { isModuleId, canManage, practiceBlock } from '../../domain/modules';
+import { useCatalog } from '../../context/CatalogContext';
+import { useAuth } from '../../context/AuthContext';
+import { getSignsByCategory } from '../../data/signData';
 export default function ModuleGate({ children, training = false }: { children: ReactNode; training?: boolean }) {
   const { states: moduleStates, loading, error, refresh } = useCatalog();
   const { user, roleLoading } = useAuth();
