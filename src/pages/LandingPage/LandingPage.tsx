@@ -1,31 +1,17 @@
 // src/pages/LandingPage/LandingPage.tsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { categoryData } from '../../data/signData';
-import { speak } from '../../utils/speech';
 import { useAuth } from '../../context/AuthContext';
 import { practiceBlock } from '../../domain/modules';
 import { useCatalog } from '../../context/CatalogContext';
-import { useSpeech } from '../../context/SpeechContext';
 
 const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const { states: moduleStates, loading, error, refresh } = useCatalog();
-  const { isSpeechEnabled } = useSpeech();
 
-  useEffect(() => {
-    const hasWelcomed = sessionStorage.getItem('hasWelcomed');
-
-    if (isSpeechEnabled && !hasWelcomed) {
-      const welcomeTimeout = setTimeout(() => {
-        speak("Bienvenido a KaiSeñas");
-        sessionStorage.setItem('hasWelcomed', 'true');
-      }, 500);
-      return () => clearTimeout(welcomeTimeout);
-    }
-  }, [isSpeechEnabled]);
 
   return (
     <div className={styles.pageContainer}>

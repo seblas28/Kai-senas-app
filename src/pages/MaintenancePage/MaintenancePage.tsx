@@ -47,7 +47,7 @@ export default function MaintenancePage() {
   const setTab = (value: string) => setSearchParams(value === 'maintenance' ? {} : { seccion: value });
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
-  if (roleLoading || catalog.loading) return <section className="kai-notice" role="status">Comprobando permisos…</section>;
+  if (catalog.loading || (roleLoading && !canManage(user?.role))) return <section className="kai-notice" role="status">Comprobando permisos…</section>;
   if (!canManage(user?.role)) return <section className="kai-notice"><h1>Acceso restringido</h1><p>Esta sección requiere una cuenta administradora.</p><Link to="/login">Mi cuenta</Link></section>;
   if (catalog.error) return <section className="kai-notice" role="alert">{catalog.error}<button onClick={() => void catalog.refresh()}>Reintentar</button></section>;
   const module = catalog.modules.find(row => row.id === selected);

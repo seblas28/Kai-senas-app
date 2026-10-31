@@ -5,7 +5,6 @@ import { canManage } from '../../domain/modules';
 import { Link, NavLink } from 'react-router-dom';
 
 import styles from './Navbar.module.css';
-import SpeechToggleButton from '../SpeechToggleButton/SpeechToggleButton';
 import ThemeToggleButton from '../ThemeToggleButton/ThemeToggleButton';
 
 const Navbar: React.FC = () => {
@@ -23,7 +22,6 @@ const Navbar: React.FC = () => {
             <li><NavLink to="/ranking">Competición</NavLink></li> 
           {!roleLoading && canManage(user?.role) && <li><NavLink to="/administracion">Administración</NavLink></li>}
           </ul>
-          <SpeechToggleButton />
           <ThemeToggleButton />
           {/* Lógica condicional para mostrar Login o Logout */}
           <Link to="/login" className={styles.loginLink}>Mi cuenta</Link>

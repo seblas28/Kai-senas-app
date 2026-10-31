@@ -4,8 +4,6 @@ import { useParams } from 'react-router-dom';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import * as tf from '@tensorflow/tfjs';
 import styles from "./PracticeView.module.css";
-import { speak } from '../../utils/speech';
-import { useSpeech } from "../../context/SpeechContext";
 import { loadPracticeModel } from '../../lib/modelRuntime';
 import { allSignData } from "../../data/signData";
 import { useProgress } from '../../context/ProgressContext';
@@ -48,7 +46,6 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   const debounceTimeout = useRef<number | null>(null);
 
   const { category: urlCategory, sign } = useParams<{ category: string; sign: string }>();
-  const { isSpeechEnabled } = useSpeech();
 
   const category = propCategory || urlCategory;
   
@@ -139,7 +136,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       videoRef.current.srcObject = stream;
       videoRef.current.addEventListener("loadeddata", () => {
         setIsCameraOn(true);
-        if (isSpeechEnabled) speak("Cámara encendida.");
+
         isScanningRef.current = true; // Empezamos a dibujar el esqueleto en cuanto se enciende
 
       }, { once: true });
@@ -155,7 +152,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
-    if (isSpeechEnabled) speak("Cámara apagada.");
+
   };
 
   const startScan = () => {
@@ -169,7 +166,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     setPredictedSign('...');
     setConfidence(0);
     sessionStartTimeRef.current = Date.now();
-    if(isSpeechEnabled) speak("Iniciando escaneo.");
+
   };
 
   const stopScan = () => {
@@ -184,7 +181,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       setPredictedSign('...');
       setConfidence(0);
     }
-    if (isSpeechEnabled) speak('Escaneo detenido');
+
   };
 
   const saveProgress = (currentScore: number, practiceTime: number, completed: boolean) => {
@@ -206,7 +203,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
       setIsScanning(false);
       setIsTaskCompleted(true);
       saveProgress(next.score, (Date.now() - sessionStartTimeRef.current) / 1000, true);
-      if (isSpeechEnabled) speak('¡Muy bien! Has validado ' + sign);
+
     }
   };
 
@@ -279,7 +276,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
     if (isScanningRef.current) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
     }
-  }, [handLandmarker, labels, sign, isSpeechEnabled, onPrediction, iaModel, category, user?.id]);
+  }, [handLandmarker, labels, sign, onPrediction, iaModel, category, user?.id]);
   
   useEffect(() => {
     isScanningRef.current = isCameraOn; // El bucle ahora depende solo de si la cámara está encendida

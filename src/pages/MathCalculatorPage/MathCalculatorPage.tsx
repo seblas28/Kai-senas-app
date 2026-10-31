@@ -3,8 +3,6 @@ import { evaluateEquation } from '../../domain/math';
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './MathCalculatorPage.module.css';
 import PracticeView from '../../components/PracticeView/PracticeView';
-import { speak } from '../../utils/speech';
-import { useSpeech } from '../../context/SpeechContext';
 import { Link } from 'react-router-dom';
 import { signTypeMap } from '../../data/signData';
 
@@ -14,7 +12,6 @@ type ExpectedInput = 'number' | 'operator' | 'equal';
 const MathCalculatorPage: React.FC = () => {
   const [equation, setEquation] = useState<string[]>([]);
   const [result, setResult] = useState<string | null>(null);
-  const { isSpeechEnabled } = useSpeech();
   
   const [livePrediction, setLivePrediction] = useState<string>('...');
   const [captureProgress, setCaptureProgress] = useState(0);
@@ -25,7 +22,7 @@ const MathCalculatorPage: React.FC = () => {
 
   const addSignToEquation = (sign: string) => {
     setEquation(prev => [...prev, sign]);
-    if (isSpeechEnabled) speak(sign);
+
     // Actualizamos el estado para esperar el siguiente tipo de seña
     setExpectedInput(expectedInput === 'number' ? 'operator' : 'number');
     resetCapture();
@@ -75,7 +72,7 @@ const MathCalculatorPage: React.FC = () => {
       try {
         const calcResult = evaluateEquation(equation);
         setResult(calcResult.toString());
-        if (isSpeechEnabled) speak(`El resultado es ${calcResult}`);
+
       } catch (e) { /* ... */ }
     }
     resetCapture();
@@ -108,7 +105,7 @@ const MathCalculatorPage: React.FC = () => {
     setLivePrediction('...');
     setExpectedInput('number'); // Volvemos al estado inicial
     resetCapture();
-    if (isSpeechEnabled) speak("Limpiado");
+
   };
 
   const getExpectedInputMessage = () => {

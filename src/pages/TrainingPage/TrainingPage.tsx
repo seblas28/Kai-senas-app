@@ -4,8 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getSignsForTraining} from '../../data/signData';
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import styles from './TrainingPage.module.css';
-import { useSpeech } from '../../context/SpeechContext';
-import { speak } from '../../utils/speech';
 import TrainingSummaryCard from '../../components/TrainingSummaryCard/TrainingSummaryCard';
 
 const drawingOptions = {
@@ -20,7 +18,6 @@ const SAMPLES_PER_BURST = 30;
 
 const TrainingPage: React.FC = () => {
   const { category } = useParams<{ category: string }>();
-  const { isSpeechEnabled } = useSpeech();
   const navigate = useNavigate();
 
   const [categoryLabels, setCategoryLabels] = useState<string[]>([]);
@@ -76,7 +73,7 @@ const TrainingPage: React.FC = () => {
       if (allLabels.length > 0) {
         setSelectedLabel(allLabels[0]);
       }
-      if(isSpeechEnabled) speak(`Entrenando la categoría ${category}.`);
+
     }
 
     captureActive.current = true;
@@ -99,7 +96,7 @@ const TrainingPage: React.FC = () => {
     fetchSummary();
     
     return () => {
-      stopCamera(false);
+      stopCamera();
       cancelled = true;
       captureActive.current = false;
       owned?.close();
@@ -109,7 +106,7 @@ const TrainingPage: React.FC = () => {
   }, [category, fetchSummary]);
 
   const handleGoHome = () => {
-    stopCamera(true);
+    stopCamera();
     setTimeout(() => navigate('/administracion?seccion=captura'), 700);
   };
 
@@ -124,17 +121,16 @@ const TrainingPage: React.FC = () => {
         setIsCameraOn(true);
         isCameraOnRef.current = true;
 
-        if(isSpeechEnabled) speak("Cámara encendida.");
       }, { once: true });
     }
     } catch { setFeedbackMessage('No se pudo acceder a la cámara. Comprueba sus permisos.'); }
   };
 
-  const stopCamera = (shouldSpeak: boolean = true) => {
+  const stopCamera = () => {
     lastCapturedHands.current = null;
     if (animationFrameId.current !== null) cancelAnimationFrame(animationFrameId.current);
     if (!isCameraOnRef.current) return;
-    if (shouldSpeak && isSpeechEnabled) speak("Cámara apagada.");
+
     isCameraOnRef.current = false;
     setIsCameraOn(false);
     if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -188,7 +184,7 @@ const TrainingPage: React.FC = () => {
   };
 
   const getSampleCount = (label: string) => trainingData.filter(d => d.label === label).length;
-  const handleLabelSelect = (label: string) => { setSelectedLabel(label); if(isSpeechEnabled) speak(`Seleccionado: ${label}`); };
+  const handleLabelSelect = (label: string) => { setSelectedLabel(label); };
  
   const handleCapture = (): boolean => {
     const sample = lastCapturedHands.current;
@@ -232,17 +228,13 @@ const TrainingPage: React.FC = () => {
 
   const handleClearSelectedLabelData = () => {
     const samplesToKeep = trainingData.filter(sample => sample.label !== selectedLabel);
-    const samplesRemovedCount = trainingData.length - samplesToKeep.length;
     setTrainingData(samplesToKeep);
-    if (isSpeechEnabled && samplesRemovedCount > 0) {
-      speak(`Se eliminaron ${samplesRemovedCount} muestras para ${selectedLabel}.`);
-    }
   };
 
   const handleClearAllData = () => {
     setTrainingData([]);
     setFeedbackMessage('');
-    if(isSpeechEnabled) speak("Todos los datos de entrenamiento han sido limpiados.");
+
   };
 
   const sortedSummary = Object.entries(trainingSummary).sort(([,a], [,b]) => b - a);
@@ -279,7 +271,7 @@ const TrainingPage: React.FC = () => {
           <div className={styles.actions}>
             {/* 1. Botones de Iconos para acciones principales */}
             <div className={styles.iconActions}>
-              <button onClick={!isCameraOn ? startCamera : () => stopCamera(true)} className={styles.iconButton} disabled={isBursting || isSending} title={isCameraOn ? "Apagar Cámara" : "Encender Cámara"}>
+              <button onClick={!isCameraOn ? startCamera : () => stopCamera()} className={styles.iconButton} disabled={isBursting || isSending} title={isCameraOn ? "Apagar Cámara" : "Encender Cámara"}>
                 {isCameraOn ? 
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 16l-4-4m0 0L8 8m4 4l4-4m-4 4l-4 4"></path><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
                   : 

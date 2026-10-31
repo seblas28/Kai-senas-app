@@ -12,7 +12,9 @@ export default function ModuleGate({ children, training = false }: { children: R
   const category = params.category || (location.pathname === '/practice/matematicas' ? 'matematicas' : undefined);
   const sign = params.sign;
   if (!isModuleId(category)) return <section className="kai-notice"><h1>Curso no encontrado</h1><Link to="/">Ver cursos</Link></section>;
-  if (loading || (training && roleLoading)) return <section className="kai-notice" role="status">Comprobando disponibilidad…</section>;
+  // Keep an already-authorized laboratory mounted during background role checks.
+  // A revoked/failed role resolves to user and still removes access below.
+  if (loading || (training && roleLoading && !canManage(user?.role))) return <section className="kai-notice" role="status">Comprobando disponibilidad…</section>;
   if (error) return <section className="kai-notice" role="alert">{error}<button onClick={() => void refresh()}>Reintentar</button></section>;
   const reason = training ? null : practiceBlock(moduleStates[category], sign);
   const invalidSign = sign && !getSignsByCategory(category).some(item => item.label === sign);

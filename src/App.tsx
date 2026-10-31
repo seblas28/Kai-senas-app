@@ -7,7 +7,6 @@ import { useAuth } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { ProgressProvider } from './context/ProgressContext';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
-import { SpeechProvider } from './context/SpeechContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar/Navbar';
@@ -34,7 +33,6 @@ function DataProviders({ children }: { children: React.ReactNode }) {
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <SpeechProvider>
         <Router>
           <AuthProvider>
           <DataProviders>
@@ -59,7 +57,6 @@ const App: React.FC = () => {
           </DataProviders>
           </AuthProvider>
         </Router>
-      </SpeechProvider>
     </ThemeProvider>
   );
 };
