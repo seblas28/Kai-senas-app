@@ -1,76 +1,42 @@
-/* src/pages/LandingPage/LandingPage.module.css */
-.pageContainer {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.hero {
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.heroTitle {
-  font-size: 3rem;
-  color: var(--primary-color);
-  margin-bottom: 1rem;
-}
-
-.heroSubtitle {
-  font-size: 1.2rem;
-  color: var(--text-color-light);
-  max-width: 700px;
-  margin: 0 auto 2rem auto;
-  line-height: 1.6;
-}
-
-.coursesSection {
-  padding: 3rem 0;
-  border-top: 1px solid var(--border-color);
-}
-
-.sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.sectionTitle {
-  font-size: 2.5rem;
-  color: var(--primary-color);
-  margin: 0;
-}
-
-.trainButton {
-  background-color: var(--background-color);
-  color: var(--primary-color);
-  border: 2px solid var(--secondary-color);
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.trainButton:hover {
-  background-color: var(--secondary-color);
-  color: white;
-}
-
-.cardGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 2rem;
-  grid-auto-rows: 1fr;
-}
-
-.cardLink {
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-}
+.pageContainer { max-width: 1240px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+.hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 4rem; align-items: center; padding: 2rem 0 5rem; }
+.eyebrow { color: var(--primary-color); font-size: .72rem; font-weight: 800; letter-spacing: .15em; margin: 0 0 1rem; line-height: 1.6; }
+.hero h1 { font-size: clamp(2.8rem, 4.8vw, 4.5rem); line-height: 1.08; letter-spacing: -.055em; margin: 0 0 1.5rem; font-weight: 750; }
+.hero h1 span { color: var(--primary-color); }
+.intro { max-width: 460px; font-size: 1.1rem; line-height: 1.8; color: var(--text-color-light); }
+.actions { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; margin: 2rem 0 1.25rem; }
+.primaryAction, .secondaryAction, .textLink { text-decoration: none; font-weight: 700; }
+.primaryAction { display: inline-flex; gap: 1.5rem; align-items: center; background: #4a47a3; color: #fff; padding: 1rem 1.3rem; border-radius: 12px; }
+.primaryAction:hover { background: #39377f; }
+.secondaryAction, .textLink { color: var(--primary-color); }
+.secondaryAction:hover, .textLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+.heroNote { font-size: .8rem; line-height: 1.6; color: var(--text-color-light); }
+.heroVisual { background: #e7e6fa; color: #363375; border-radius: 28px; padding: 1.7rem; overflow: hidden; transform: rotate(2deg); }
+.visualTop { display: flex; justify-content: space-between; font-size: .65rem; font-weight: 800; letter-spacing: .13em; }
+.letterComposition { display: grid; grid-template-columns: repeat(6, 1fr); gap: .65rem; padding: 2.5rem .5rem; }
+.letterComposition span { grid-column: span 2; display: grid; place-items: center; border-radius: 22px; aspect-ratio: 1; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 750; letter-spacing: -.08em; background: #f9f8ff; transform: rotate(-8deg); }
+.letterComposition span:nth-child(2) { background: #4a47a3; color: #fff; transform: translateY(12px) rotate(8deg); }
+.letterComposition span:nth-child(3) { background: #c7edda; transform: rotate(-4deg); }
+.letterComposition span:nth-child(4) { grid-column: 2 / span 2; background: #f5d9b5; transform: rotate(8deg); }
+.letterComposition span:nth-child(5) { background: #c8c5ee; transform: rotate(-5deg); }
+.visualBottom { display: flex; align-items: center; justify-content: space-between; font-size: .85rem; line-height: 1.7; }
+.visualArrow { font-size: 2rem; }
+.howSection, .coursesSection { padding: 3.5rem 0; border-top: 1px solid var(--border-color); scroll-margin-top: 2rem; }
+.sectionHeader { display: flex; justify-content: space-between; gap: 2rem; align-items: end; margin-bottom: 2rem; }
+.sectionHeader h2, .nextSection h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.2; letter-spacing: -.035em; }
+.sectionHeader > p { color: var(--text-color-light); line-height: 1.7; font-size: .9rem; margin: 0; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.steps li { padding: 1.8rem; border-radius: 18px; background: var(--card-bg); border: 1px solid var(--border-color); }
+.stepNumber { color: var(--primary-color); font-size: .8rem; font-weight: 800; }
+.steps h3 { font-size: 1.1rem; margin: 1.5rem 0 .6rem; }
+.steps p, .nextSection p { color: var(--text-color-light); line-height: 1.8; margin-bottom: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.nextSection { display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; padding: 3rem; border-radius: 24px; background: var(--card-bg); border: 1px solid var(--border-color); margin-top: 1rem; }
+.nextSection .eyebrow { color: var(--primary-color); margin-bottom: 1rem; }
+.textLink { display: inline-block; margin-top: 1.5rem; line-height: 1.6; }
+.competition { border-left: 1px solid var(--border-color); padding-left: 3rem; }
+.competition h3 { font-size: 1.4rem; margin-bottom: .5rem; }
+.soon { color: var(--primary-color); font-size: .65rem; font-weight: 800; letter-spacing: .1em; border: 1px solid var(--border-color); padding: .4rem .65rem; border-radius: 30px; display: inline-block; }
+.pageContainer a:focus-visible, .pageContainer button:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 5px; }
+@media (max-width: 900px) { .hero { gap: 2rem; } .sectionHeader { align-items: start; flex-direction: column; gap: 1rem; } .steps { gap: .75rem; } .steps li { padding: 1.2rem; } .nextSection { gap: 2rem; padding: 2rem; } .competition { padding-left: 2rem; } }
+@media (max-width: 650px) { .pageContainer { padding: 1.5rem 1.2rem 2rem; } .hero { grid-template-columns: 1fr; padding: 1rem 0 3rem; gap: 2rem; } .heroVisual { max-width: 400px; width: 100%; justify-self: center; transform: none; } .letterComposition { padding: 1.5rem .5rem; } .letterComposition span { font-size: 3rem; } .steps, .cardGrid, .nextSection { grid-template-columns: 1fr; } .howSection, .coursesSection { padding: 2.5rem 0; } .competition { padding: 2rem 0 0; border-left: 0; border-top: 1px solid var(--border-color); } .nextSection { padding: 1.5rem; } }
