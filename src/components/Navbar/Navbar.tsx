@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { canManage } from '../../domain/modules';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import styles from './Navbar.module.css';
 import SpeechToggleButton from '../SpeechToggleButton/SpeechToggleButton';
@@ -18,11 +18,10 @@ const Navbar: React.FC = () => {
         <Link to="/" className={styles.brand}> KaiSeñas 👋 </Link>
         <div className={styles.navItems}>
           <ul className={styles.navLinks}>
-            <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/progreso">Mi Progreso</Link></li>
-            <li><Link to="/ranking">Competición</Link></li>
-            {!roleLoading && canManage(user?.role) && <li><Link to="/training/vocales">Capturar muestras</Link></li>} 
-          {!roleLoading && canManage(user?.role) && <li><Link to="/administracion">Administración</Link></li>}
+            <li><NavLink to="/" end>Inicio</NavLink></li>
+            <li><NavLink to="/progreso">Mi Progreso</NavLink></li>
+            <li><NavLink to="/ranking">Competición</NavLink></li> 
+          {!roleLoading && canManage(user?.role) && <li><NavLink to="/administracion">Administración</NavLink></li>}
           </ul>
           <SpeechToggleButton />
           <ThemeToggleButton />

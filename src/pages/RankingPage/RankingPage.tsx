@@ -1,8 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import styles from './RankingPage.module.css';
+
+const categories = [
+  { id: 'vocales', number: '01', title: 'Vocales', description: 'Refuerza las primeras señas de tu aprendizaje.', detail: 'A · E · I · O · U' },
+  { id: 'abecedario', number: '02', title: 'Abecedario', description: 'Practica las letras que tienen ejercicios disponibles.', detail: 'Una letra a la vez' },
+  { id: 'numeros', number: '03', title: 'Números', description: 'Gana soltura al expresar cantidades con tus manos.', detail: 'Del 1 al 10' },
+];
 export default function RankingPage() {
-  return <section className="kai-notice"><p className="kai-eyebrow">Competición</p><h1>Cada seña, un nuevo reto</h1>
-    <p>La clasificación entre usuarios estará disponible cuando se habiliten las cuentas y las evaluaciones competitivas.</p>
-    <p>Se compararán los mejores resultados de vocales, abecedario y números. Matemáticas quedará fuera durante alpha y beta.</p>
-    <p>Tu progreso de práctica es personal y no se publica como un resultado competitivo.</p><Link to="/">Seguir practicando</Link>
-  </section>;
+  const { user } = useAuth();
+  return <div className={styles.page}>
+    <section className={styles.hero} aria-labelledby="competition-title">
+      <div><span className={styles.status}><span aria-hidden="true" />EN PREPARACIÓN</span><p className={styles.eyebrow}>COMPETICIÓN KAI SEÑAS</p><h1 id="competition-title">Tu próximo reto<br />empieza <em>contigo.</em></h1><p className={styles.intro}>Practica, mejora y prepárate para compartir un nuevo desafío con otros aprendices. Cada seña que refuerzas es un paso más.</p><div className={styles.actions}><Link to="/" className={styles.primary}>Explorar prácticas <span aria-hidden="true">↗</span></Link><Link to="/progreso" className={styles.secondary}>Ver mi progreso</Link></div></div>
+      <div className={styles.heroVisual} aria-hidden="true"><div className={styles.visualHeader}><span>APRENDE / SUPÉRATE</span><span>↗</span></div><div className={styles.target}><div><span>UN NUEVO</span><strong>RETO</strong><span>UNA SEÑA A LA VEZ</span></div></div><div className={styles.visualFooter}><span>Tu constancia es<br /><strong>el punto de partida.</strong></span><span className={styles.spark}>✳</span></div></div>
+    </section>
+    <section className={styles.board} aria-labelledby="board-title"><div className={styles.sectionHeader}><div><p className={styles.eyebrow}>CLASIFICACIÓN GENERAL</p><h2 id="board-title">Un lugar para tus próximos logros.</h2></div><span className={styles.pill}>Sin temporada activa</span></div><div className={styles.emptyBoard}><span className={styles.emptyIcon} aria-hidden="true">↗</span><h3>El primer reto está por llegar</h3><p>La clasificación todavía no está habilitada. Aquí aparecerán los resultados cuando estén disponibles las evaluaciones competitivas.</p><span className={styles.emptyNote}>Tus prácticas actuales siguen siendo personales.</span></div></section>
+    <section className={styles.categorySection} aria-labelledby="categories-title"><div className={styles.sectionHeader}><div><p className={styles.eyebrow}>PREPÁRATE A TU RITMO</p><h2 id="categories-title">Tres formas de seguir mejorando.</h2></div><p>Estas categorías formarán parte<br />del resultado global previsto.</p></div><div className={styles.categoryGrid}>{categories.map(category => <article key={category.id} className={styles.categoryCard}><span className={styles.number}>{category.number}</span><p className={styles.categoryDetail}>{category.detail}</p><h3>{category.title}</h3><p>{category.description}</p><Link to={`/practice/${category.id}`} className={styles.textLink}>Ver ejercicios <span aria-hidden="true">→</span></Link></article>)}</div></section>
+    <section className={styles.rules} aria-labelledby="rules-title"><div><p className={styles.eyebrow}>LAS REGLAS PREVISTAS</p><h2 id="rules-title">Avanzar también es<br />saber cómo cuenta.</h2><p>Antes de abrir una temporada, mostraremos sus reglas y las condiciones para participar.</p></div><dl><div><dt>Un promedio entre categorías</dt><dd>El resultado global combinará vocales, abecedario y números, con el mismo peso para cada categoría.</dd></div><div><dt>Matemáticas sigue en desarrollo</dt><dd>No contará en el promedio global ni en la clasificación mientras esté en alpha o beta.</dd></div><div><dt>Práctica y competición, cada una con su espacio</dt><dd>Tu progreso personal no se publicará automáticamente como una puntuación competitiva.</dd></div></dl></section>
+    <section className={styles.accountBanner}><div><h2>{user ? 'Tu siguiente paso está en tus manos.' : 'Empieza por construir tu propio progreso.'}</h2><p>{user ? 'Revisa tus resultados y elige qué señas quieres reforzar hoy.' : 'Con una cuenta puedes guardar tus prácticas y volver a tus resultados desde otros dispositivos.'}</p></div><Link className={styles.primary} to={user ? '/progreso' : '/login'}>{user ? 'Ir a mi progreso' : 'Ir a mi cuenta'} <span aria-hidden="true">→</span></Link></section>
+  </div>;
 }

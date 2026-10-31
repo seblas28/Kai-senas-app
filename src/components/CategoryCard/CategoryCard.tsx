@@ -7,13 +7,11 @@ interface CategoryCardProps {
   title: string;
   imageSrc: string;
   practiceLink: string;
-  trainLink: string;
-  isAdmin: boolean;
   tag?: string;
   maintenanceReason?: string;
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLink, trainLink, isAdmin, tag, maintenanceReason }) => {
+const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLink, tag, maintenanceReason }) => {
   return (
     <div className={styles.card}>
       <img src={imageSrc} alt={`Categoría ${title}`} className={styles.cardImage} />
@@ -24,11 +22,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, imageSrc, practiceLi
       </div>
 
       <div className={styles.buttons}>
-        {isAdmin && (
-          <Link to={trainLink} className={styles.buttonSecondary}>
-            Entrenar IA
-          </Link>
-        )}
         {maintenanceReason ? <p className="kai-maintenance" role="status">En mantenimiento: {maintenanceReason}</p> : <Link to={practiceLink} className={styles.button}>Practicar</Link>}
       </div>
     </div>

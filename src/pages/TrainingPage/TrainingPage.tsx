@@ -110,7 +110,7 @@ const TrainingPage: React.FC = () => {
 
   const handleGoHome = () => {
     stopCamera(true);
-    setTimeout(() => navigate('/'), 700);
+    setTimeout(() => navigate('/administracion?seccion=captura'), 700);
   };
 
   const startCamera = async () => {
@@ -257,7 +257,7 @@ const TrainingPage: React.FC = () => {
             {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
         </div>
         <div className={styles.controls}>
-          <nav aria-label="Categoría de captura">{['vocales', 'abecedario', 'numeros', 'matematicas'].map(id => <a key={id} href={'/training/' + id} style={{ marginRight: '1rem' }}>{id}</a>)}</nav>
+          <nav aria-label="Categoría de captura">{['vocales', 'abecedario', 'numeros', 'matematicas'].map(id => <a key={id} href={'/administracion/captura/' + id} style={{ marginRight: '1rem' }}>{id}</a>)}</nav>
           <h1 className={styles.title}>
             Laboratorio local: <span className={styles.highlight}>{category}</span>
           </h1>
@@ -307,7 +307,7 @@ const TrainingPage: React.FC = () => {
             </div>
             
             <button onClick={handleGoHome} className={styles.backButton}>
-              ← Volver al Inicio
+              ← Volver a Administración
             </button>
           </div>
         </div>

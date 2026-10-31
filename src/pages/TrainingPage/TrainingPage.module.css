@@ -230,3 +230,10 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
+
+@media(max-width:1000px) {
+  .trainingPanel { flex-direction: column; }
+  .videoContainer { min-width: 0; width: 100%; aspect-ratio: 4 / 3; padding-top: 0; }
+  .pageWrapper { padding: 1rem; min-height: 0; }
+  .trainingPanel, .summaryPanel { padding: 1rem; }
+}

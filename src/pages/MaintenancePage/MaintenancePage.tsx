@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCatalog } from '../../context/CatalogContext';
 import { canManage } from '../../domain/modules';
@@ -41,7 +41,10 @@ export default function MaintenancePage() {
   const { user, roleLoading } = useAuth();
   const catalog = useCatalog();
   const [selected, setSelected] = useState('vocales');
-  const [tab, setTab] = useState<'maintenance' | 'models' | 'permissions'>('maintenance');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('seccion');
+  const tab = requestedTab === 'models' || requestedTab === 'permissions' || requestedTab === 'captura' ? requestedTab : 'maintenance';
+  const setTab = (value: string) => setSearchParams(value === 'maintenance' ? {} : { seccion: value });
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   if (roleLoading || catalog.loading) return <section className="kai-notice" role="status">Comprobando permisos…</section>;
@@ -58,10 +61,10 @@ export default function MaintenancePage() {
       <div><span>Señas sin modelo</span><strong>{catalog.exercises.filter(row => !row.supported).length}</strong><small>Pendientes de cobertura</small></div>
       <div><span>Publicación</span><strong className={styles.summaryWord}>{user?.role === 'superadmin' ? 'Habilitada' : 'Restringida'}</strong><small>Solo para superadmin</small></div>
     </div>
-    <nav className={styles.sectionNav} aria-label="Secciones de administración">{([{ id: 'maintenance', text: 'Prácticas y mantenimiento' }, { id: 'models', text: 'Modelos de IA' }, { id: 'permissions', text: 'Roles y permisos' }] as const).map(item => <button key={item.id} type="button" aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)}>{item.text}</button>)}</nav>
+    <nav className={styles.sectionNav} aria-label="Secciones de administración">{([{ id: 'maintenance', text: 'Prácticas y mantenimiento' }, { id: 'captura', text: 'Captura de muestras' }, { id: 'models', text: 'Modelos de IA' }, { id: 'permissions', text: 'Roles y permisos' }] as const).map(item => <button key={item.id} type="button" aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)}>{item.text}</button>)}</nav>
     {tab === 'maintenance' && <div className={styles.workspace}>
       <aside className={styles.sidebar}><h2>Módulos</h2>{catalog.modules.map(row => <button key={row.id} type="button" aria-pressed={selected === row.id} onClick={() => { setSelected(row.id); setSearch(''); setFilter('all'); }}><strong>{titles[row.id] || row.id}</strong><span>{row.visibility === 'hidden' ? 'Oculto' : row.status === 'maintenance' ? 'En mantenimiento' : 'Activo'} · {row.stage === 'stable' ? 'Estable' : row.stage}</span></button>)}<p>El estado del módulo se aplica a todas sus señas.</p></aside>
-      <div className={styles.content}><div className={styles.sectionHeading}><div><p className={styles.eyebrow}>DISPONIBILIDAD</p><h2>{titles[selected] || selected}</h2></div><Link className={styles.textLink} to={`/training/${selected}`}>Capturar muestras ↗</Link></div>
+      <div className={styles.content}><div className={styles.sectionHeading}><div><p className={styles.eyebrow}>DISPONIBILIDAD</p><h2>{titles[selected] || selected}</h2></div><Link className={styles.textLink} to={`/administracion/captura/${selected}`}>Capturar muestras ↗</Link></div>
         {module && <MaintenanceForm key={selected} moduleId={selected} status={module.status} visibility={module.visibility} reason={module.maintenance_reason} afterSave={catalog.refresh} />}
         <div className={styles.sectionHeading}><div><h2>Señas del módulo</h2><p>{exercises.filter(row => row.supported).length} de {exercises.length} con modelo compatible</p></div></div>
         {module && (module.status !== 'active' || module.visibility !== 'visible') && <p className={styles.warning}>Este módulo está {module.visibility === 'hidden' ? 'oculto' : 'en mantenimiento'}. Sus señas no estarán disponibles aunque estén activas.</p>}
@@ -71,6 +74,7 @@ export default function MaintenancePage() {
         {!visibleExercises.length && <p className={styles.empty}>No hay señas que coincidan con estos filtros.</p>}
       </div>
     </div>}
+    {tab === 'captura' && <div className={styles.panel}><p className={styles.eyebrow}>LABORATORIO LOCAL</p><h2>Captura de muestras</h2><p>Elige un módulo para capturar señas con tu cámara y descargar el dataset. Después podrás entrenar en tu equipo y enviar el modelo a revisión.</p><div className={styles.captureGrid}>{catalog.modules.map(row => <article key={row.id} className={styles.captureCard}><span className={styles.eyebrow}>{row.stage === 'stable' ? 'ESTABLE' : row.stage.toUpperCase()}</span><h3>{titles[row.id] || row.id}</h3><p>{catalog.exercises.filter(exercise => exercise.module_id === row.id).length} señas en el catálogo</p><Link className={styles.primaryButton} to={`/administracion/captura/${row.id}`}>Abrir captura ↗</Link></article>)}</div><div className={styles.infoBox}><h3>Capturar, entrenar y publicar son pasos distintos</h3><p>La captura no cambia las prácticas disponibles. Los modelos se envían desde Modelos de IA; solo el superadmin puede aprobarlos y publicarlos. Puedes capturar muestras aunque un módulo esté en mantenimiento.</p></div></div>}
     {tab === 'models' && user && <ModelsPanel key={user.id} user={user} afterPublication={catalog.refresh} />}
     {tab === 'permissions' && <div className={styles.panel}><p className={styles.eyebrow}>RESPONSABILIDADES CLARAS</p><h2>Un rol para cada tarea</h2><p>El entrenamiento ocurre en tu equipo. La subida crea una versión pendiente; la aprobación y la publicación son pasos separados.</p><div className={styles.tableScroll}><table className={styles.permissionTable}><caption>Permisos de cada rol</caption><thead><tr><th scope="col">Acción</th><th scope="col">Usuario</th><th scope="col">Admin</th><th scope="col">Superadmin</th></tr></thead><tbody>{[['Practicar y guardar progreso', true, true, true], ['Capturar muestras y subir modelos', false, true, true], ['Cambiar mantenimiento y visibilidad', false, true, true], ['Revisar, aprobar o rechazar modelos', false, false, true], ['Publicar o restaurar una versión aprobada', false, false, true]].map(([action, ...permissions]) => <tr key={String(action)}><th scope="row">{action}</th>{permissions.map((allowed, index) => <td key={index}>{allowed ? 'Permitido' : '—'}</td>)}</tr>)}</tbody></table></div><div className={styles.infoBox}><h3>La aprobación no activa el modelo</h3><p>Solo la publicación cambia la versión que se cargará al abrir una práctica. No elimina el mantenimiento ni incorpora matemáticas al promedio mientras esté en alpha o beta.</p><p>Los permisos se comprueban en Supabase en cada operación. No se pueden cambiar roles desde este panel.</p></div></div>}
   </section>;

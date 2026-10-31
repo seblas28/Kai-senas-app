@@ -103,3 +103,6 @@
   .container, .navItems, .navLinks { flex-wrap: wrap; gap: 0.75rem; }
   .container { justify-content: center; }
 }
+
+.navLinks a[aria-current="page"] { color: var(--primary-color); }
+.navLinks a[aria-current="page"]::after { width: 100%; }

@@ -84,3 +84,10 @@
 .page :is(a,button,input,textarea,select,summary):focus-visible { outline: 3px solid var(--primary-color); outline-offset: 4px; }
 @media(max-width: 900px) { .summary { grid-template-columns: repeat(2,minmax(0,1fr)); } .workspace { grid-template-columns: 180px minmax(0,1fr); gap: 1rem; } .maintenanceForm, .panel, .reviewPanel { padding: 1.2rem; } .formFooter { align-items: start; flex-direction: column; } }
 @media(max-width: 650px) { .page { padding: 2rem 1rem; } .header { gap: .5rem; } .header > div { min-width: 0; } .roleBadge { font-size: .65rem; padding: .5rem; } .summary { gap: .7rem; } .summary > div { padding: 1rem; } .workspace { grid-template-columns: 1fr; } .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; } .sidebar h2, .sidebar > p { grid-column: 1 / -1; } .sidebar > p { margin: 0; } .sidebar button { padding: .8rem; } .formGrid, .filters, .workflow { grid-template-columns: 1fr; } .sectionHeading, .versionHeading { align-items: start; flex-direction: column; } .sectionNav button { flex-grow: 1; font-size: .8rem; padding: .7rem; } .workflow { gap: .6rem; } .workflow li { grid-template-columns: 1.5rem 1fr; } .workflow small { grid-column: 2; } .permissionTable th, .permissionTable td { padding: .8rem; } }
+
+.captureGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; margin: 2rem 0; }
+.captureCard { background: var(--background-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; }
+.captureCard h3 { font-size: 1.3rem; margin: .8rem 0; }
+.captureCard p { color: var(--text-color-light); line-height: 1.7; font-size: .85rem; }
+.captureCard a { text-decoration: none; margin-top: .7rem; }
+@media(max-width:650px) { .captureGrid { grid-template-columns: 1fr; } }
