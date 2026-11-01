@@ -1,3 +1,4 @@
+import { useVideoAspectRatio } from '../../hooks/useVideoAspectRatio';
 // src/components/PracticeView/PracticeView.tsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from 'react-router-dom';
@@ -34,6 +35,7 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   const savedSessionRef = useRef(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { aspectRatio, syncVideoSize } = useVideoAspectRatio();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isScanningRef = useRef(false);
   const sessionStartTimeRef = useRef<number>(0);
@@ -311,8 +313,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ category: propCategory, onP
   return (
     <div className={styles.container}>
       {saveError && <p role="alert">{saveError}</p>}
-      <div className={styles.mediaContainer}>
-        <video ref={videoRef} autoPlay playsInline className={styles.video}></video>
+      <div className={styles.mediaContainer} style={{ aspectRatio }}>
+        <video onLoadedMetadata={syncVideoSize} onResize={syncVideoSize} ref={videoRef} autoPlay playsInline className={styles.video}></video>
         <canvas ref={canvasRef} className={styles.canvas}></canvas>
         
         {isLoading && <div className={styles.placeholder}>{loadingMessage}</div>}

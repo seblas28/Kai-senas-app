@@ -1,3 +1,4 @@
+import { useVideoAspectRatio } from '../../hooks/useVideoAspectRatio';
 // src/pages/TrainingPage/TrainingPage.tsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -24,6 +25,7 @@ const TrainingPage: React.FC = () => {
   const [selectedLabel, setSelectedLabel] = useState<string>('');
   
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { aspectRatio, syncVideoSize } = useVideoAspectRatio();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isCameraOnRef = useRef(false);
   const animationFrameId = useRef<number | null>(null);
@@ -242,8 +244,8 @@ const TrainingPage: React.FC = () => {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.trainingPanel}>
-        <div className={styles.videoContainer}>
-            <video ref={videoRef} autoPlay playsInline className={styles.video}></video>
+        <div className={styles.videoContainer} style={{ aspectRatio }}>
+            <video onLoadedMetadata={syncVideoSize} onResize={syncVideoSize} ref={videoRef} autoPlay playsInline className={styles.video}></video>
             <canvas ref={canvasRef} className={styles.canvas}></canvas>
             {feedbackMessage && <div className={styles.feedbackOverlay}>{feedbackMessage}</div>}
             {!isCameraOn && !feedbackMessage && <div className={styles.placeholder}>Cámara apagada</div>}
